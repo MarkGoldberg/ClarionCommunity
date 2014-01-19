@@ -1,0 +1,18 @@
+-- BMP--
+#pragma link("AB.BMP")
+#pragma link("AB256.BMP")
+
+-- ICO --
+
+#pragma link("BINOCULR.ICO")
+#pragma link("Blank.ico")
+#pragma link("clear.ico")
+#pragma link("CLOSED.ICO")
+#pragma link("CS_SRCH.ICO")
+#pragma link("EXIT.ICO")
+#pragma link("found.ico")
+#pragma link("LIBRARY.ICO")
+#pragma link("OPENED.ICO")
+
+
+

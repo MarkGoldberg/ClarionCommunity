@@ -1,0 +1,23 @@
+-- MGLibMkr
+#noedit
+#system win32
+#model clarion lib
+#set RELEASE = on
+#pragma debug(vid=>off)
+#pragma optimize(cpu=>386)
+#pragma optimize(speed=>on)
+#pragma define(_mgLinkMode_=>on)
+#pragma define(_mgDLLMode_=>off)
+#pragma link_option(icon=>"library.ico")
+#compile "MGLibMkr.clw"
+#pragma link("C%V%ASC%X%%L%.LIB")
+#pragma link("C%V%DOS%X%%L%.LIB")
+#pragma link("library.ico")
+#pragma link("Opened.ico")
+#pragma link("Exit.ico")
+#pragma link("Closed.ico")
+#pragma link("Found.ico")
+#pragma link("CS_SRCH.ico")
+#pragma link("Blank.ico")
+#pragma link("Clear.ico")
+#link "MGLibMkr.exe"

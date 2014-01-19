@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+# Clarion 2.1.0.2447
+Project("{12B76EC0-1D7B-4FA7-A7D0-C524288B48A1}") = "mglibmkr", "mglibmkr.cwproj", "{7C245C26-1F38-4421-94E4-DEAE04663C37}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Supporting Files", "Supporting Files", "{3F010C70-683E-42AE-B4A2-CC5711D8CFAB}"
+	ProjectSection(SolutionItems) = postProject
+		MGLibMkr.clw = MGLibMkr.clw
+		resizeclass.clw = resizeclass.clw
+		FileDefs.inc = FileDefs.inc
+		resizeclass.inc = resizeclass.inc
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7C245C26-1F38-4421-94E4-DEAE04663C37}.Debug|Win32.Build.0 = Debug|Win32
+		{7C245C26-1F38-4421-94E4-DEAE04663C37}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7C245C26-1F38-4421-94E4-DEAE04663C37}.Release|Win32.Build.0 = Release|Win32
+		{7C245C26-1F38-4421-94E4-DEAE04663C37}.Release|Win32.ActiveCfg = Release|Win32
+	EndGlobalSection
+EndGlobal
