@@ -14,8 +14,9 @@
 #DISPLAY ('')
 #DISPLAY ('This Extension is *much* faster than I expected')
 #DISPLAY ('')
-#DISPLAY ('Created: Apr/6/11 by Monolith Custom Computing, Inc.')
-#DISPLAY ('Last Update: Apr/6/11')
+#DISPLAY ('https://github.com/MarkGoldberg/ClarionCommunity')
+#DISPLAY ('Created  : Apr/6/11 by Monolith Custom Computing, Inc.')
+#DISPLAY ('Update   : Feb/8/2014')
 #DISPLAY ('')
 
 #AT(%BeforeGenerateApplication)
