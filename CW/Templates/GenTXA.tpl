@@ -22,7 +22,12 @@
   #DECLARE(%ExportFolder)
   #SET(%ExportFolder, SLICE(%ExportFile, 1, LEN(CLIP( %ExportFile )) - LEN(CLIP(TAILNAME(%ExportFile)))) )  #!get folder only
   #FOR(%Module)
-    #SET (%ValueConstruct, %ExportFolder & %ModuleBase &'.TXA')
+    #IF (ITEMS( %ModuleProcedure ) = 1 )
+        #SELECT( %ModuleProcedure, 1 )
+        #SET (%ValueConstruct, %ExportFolder & %Application &'_'& %ModuleProcedure &'.TXA')
+    #ELSE
+        #SET (%ValueConstruct, %ExportFolder & %ModuleBase &'.TXA')
+    #ENDIF
     #CREATE(%ValueConstruct)
     #EXPORT(%Module)
     #CLOSE(%ValueConstruct)
