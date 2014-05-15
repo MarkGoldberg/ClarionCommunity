@@ -1,0 +1,28 @@
+! File Access Modes
+ OMIT('__FileAccessModes__',FileAccessMode:WriteOnly)
+
+!FILE:ReadOnly                EQUATE ( 0H)
+!FILE:WriteOnly               EQUATE ( 1H)
+!FILE:ReadWrite               EQUATE ( 2H)
+!!-------------
+!FILE:AnyAccess               EQUATE ( 0H)
+!FILE:DenyAll                 EQUATE (10H)
+!FILE:DenyWrite               EQUATE (20H)
+!FILE:DenyRead                EQUATE (30H)
+!FILE:DenyNone                EQUATE (40H)
+!FILE:Default                 EQUATE (FILE:ReadWrite + FILE:DenyWrite)
+
+
+FileAccessMode:ReadOnly                EQUATE ( 0H)
+FileAccessMode:WriteOnly               EQUATE ( 1H)
+FileAccessMode:ReadWrite               EQUATE ( 2H)
+!-------------
+FileAccessMode:AnyAccess               EQUATE ( 0H)
+FileAccessMode:DenyAll                 EQUATE (10H)
+FileAccessMode:DenyWrite               EQUATE (20H)
+FileAccessMode:DenyRead                EQUATE (30H)
+FileAccessMode:DenyNone                EQUATE (40H)
+FileAccessMode:Default                 EQUATE (FileAccessMode:ReadWrite + FileAccessMode:DenyWrite)
+FileAccessMode:ReadWrite_DenyNone      EQUATE (FileAccessMode:ReadWrite + FileAccessMode:DenyNone)
+ !end-OMIT('__FileAccessModes__',FILE:WriteOnly)
+

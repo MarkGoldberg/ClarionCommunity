@@ -1,0 +1,88 @@
+  OMIT('***',_C70_)
+!--- see softvelocity.public.clarion6 "Variable Data Type" Sept,12,2006 (code posted by dedpahom) -----!
+TUFO_CallInterface              INTERFACE,TYPE
+AssignLong             PROCEDURE                           !+00h 
+AssignReal             PROCEDURE                           !+04h 
+AssignUFO              PROCEDURE                           !+08h 
+DistinctsUFO           PROCEDURE                           !+0Ch
+DistinctsLong          PROCEDURE                           !+10h
+_Type                  PROCEDURE(LONG _UfoAddr),LONG       !+14h 
+ToMem                  PROCEDURE                           !+18h
+FromMem                PROCEDURE                           !+1Ch
+OldFromMem             PROCEDURE                           !+20h
+Pop                    PROCEDURE(LONG _UfoAddr)            !+24h
+Push                   PROCEDURE(LONG _UfoAddr)            !+28h
+DPop                   PROCEDURE(LONG _UfoAddr)            !+2Ch 
+DPush                  PROCEDURE(LONG _UfoAddr)            !+30h 
+_Real                  PROCEDURE(LONG _UfoAddr),REAL       !+34h 
+_Long                  PROCEDURE(LONG _UfoAddr),LONG       !+38h
+_Free                  PROCEDURE(LONG _UfoAddr)            !+3Ch
+_Clear                 PROCEDURE                           !+40h
+_Address               PROCEDURE(LONG _UfoAddr),LONG       !+44h
+AClone                 PROCEDURE(LONG _UfoAddr),LONG       !+48h
+Select                 PROCEDURE                           !+4Ch 
+Slice                  PROCEDURE                           !+50h 
+Designate              PROCEDURE                           !+54h
+_Max                   PROCEDURE(LONG _UfoAddr),LONG       !+58h
+_Size                  PROCEDURE(LONG _UfoAddr),LONG       !+5Ch
+BaseType               PROCEDURE(LONG _UfoAddr),LONG       !+60h
+DistinctUpper          PROCEDURE                           !+64h
+Cleared                PROCEDURE(LONG _UfoAddr)            !+68h
+IsNull                 PROCEDURE(LONG _UfoAddr),LONG       !+6Ch
+OEM2ANSI               PROCEDURE(LONG _UfoAddr)            !+70h
+ANSI2OEM               PROCEDURE(LONG _UfoAddr)            !+74h
+_Bind                  PROCEDURE(LONG _UfoAddr)            !+78h
+_Add                   PROCEDURE                           !+7Ch
+Divide                 PROCEDURE                           !+80h
+Hash                   PROCEDURE(LONG _UfoAddr),LONG       !+84h
+SetAddress             PROCEDURE                           !+88h 
+Match                  PROCEDURE                           !+8Ch 
+Identical              PROCEDURE                           !+90h
+Store                  PROCEDURE                           !+94h
+                                END
+  !END-OMIT('***',_C70_)
+
+  COMPILE('***',_C70_)
+!According to Randy Rogers (Skype PM, Dec 13, 2010)
+TUFO_CallInterface              INTERFACE,TYPE
+_Type                             PROCEDURE(LONG _UfoAddr),LONG       !+00h
+ToMem                             PROCEDURE                           !+04h
+FromMem                           PROCEDURE                           !+08h
+OldFromMem                        PROCEDURE                           !+0Ch
+Pop                               PROCEDURE(LONG _UfoAddr)            !+10h get a value from string stack
+Push                              PROCEDURE(LONG _UfoAddr)            !+14h put a vaule to string stack
+DPop                              PROCEDURE(LONG _UfoAddr)            !+18h get a value from DECIMAL stack
+DPush                             PROCEDURE(LONG _UfoAddr)            !+1Ch put a vaule to DECIMAL stack
+_Real                             PROCEDURE(LONG _UfoAddr),REAL       !+20h get a value as REAL
+_Long                             PROCEDURE(LONG _UfoAddr),LONG       !+24h get a value as LONG
+_Free                             PROCEDURE(LONG _UfoAddr)            !+28h disposes memory and frees a reference (sets it to NULL)
+_Clear                            PROCEDURE                           !+2Ch clears a variable
+_Address                          PROCEDURE(LONG _UfoAddr),LONG       !+30h returns an address of a variable
+AssignLong                        PROCEDURE                           !+34h
+AssignReal                        PROCEDURE                           !+38h
+AssignUFO                         PROCEDURE                           !+3Ch
+AClone                            PROCEDURE(LONG _UfoAddr),LONG       !+40h
+Select                            PROCEDURE                           !+44h
+Slice                             PROCEDURE                           !+48h
+Designate                         PROCEDURE                           !+4Ch returns group field as UFO object
+_Max                              PROCEDURE(LONG _UfoAddr),LONG       !+50h number of elements in first dimension of an array
+_Size                             PROCEDURE(LONG _UfoAddr),LONG       !+54h size of an object
+BaseType                          PROCEDURE(LONG _UfoAddr),LONG       !+58h
+DistinctUpper                     PROCEDURE                           !+5Ch
+DistinctsUFO                      PROCEDURE                           !+60h
+DistinctsLong                     PROCEDURE                           !+64h
+Cleared                           PROCEDURE(LONG _UfoAddr)            !+68h was an object disposed?
+IsNull                            PROCEDURE(LONG _UfoAddr),LONG       !+6Ch
+OEM2ANSI                          PROCEDURE(LONG _UfoAddr)            !+70h
+ANSI2OEM                          PROCEDURE(LONG _UfoAddr)            !+74h
+_Bind                             PROCEDURE(LONG _UfoAddr)            !+78h bind all fields of a group
+_Add                              PROCEDURE                           !+7Ch
+Divide                            PROCEDURE                           !+80h
+Hash                              PROCEDURE(LONG _UfoAddr),LONG       !+84h Calc CRC
+SetAddress                        PROCEDURE                           !+88h sets the address of a variable
+Match                             PROCEDURE                           !+8Ch compares the type and the size of a field with a field of ClassDesc structure
+Identical                         PROCEDURE                           !+90h
+Store                             PROCEDURE                           !+94h writes the value of an object into the memory address
+                                END
+  !END-COMPILE('***',_C70_)
+
