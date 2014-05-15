@@ -11,3 +11,7 @@
 *.lai
 *.la
 *.a
+CW/Win32Lib/
+*.RSC
+*.MAP
+CW/Demos/Touch X/obj/release/touch.cwproj.FileList.xml
