@@ -1,0 +1,45 @@
+-- CUR --
+#pragma link("morfo.cur")
+
+-- EMF --
+#pragma link("zoom.emf")
+#pragma link("clogo.emf")
+
+-- WMF --
+#pragma link("clogo.wmf")
+
+-- JPG --
+#pragma link("wp_touch.jpg")
+#pragma link("wp.jpg")
+#pragma link("toolbar.jpg")
+#pragma link("wp_drag.jpg")
+#pragma link("CW.jpg")
+
+#pragma link("CC_LOG.JPG")
+
+-- PNG --
+#pragma link("morfo.png")
+#pragma link("Close.png")
+#pragma link("on.png")
+#pragma link("p_dot.png")
+#pragma link("default_dot.png")
+#pragma link("sv_logo.png")
+#pragma link("drag.png")
+#pragma link("default_dot1.png")
+#pragma link("clarion.png")
+#pragma link("H5.png")
+#pragma link("green_dot.png")
+#pragma link("Touch.png")
+#pragma link("Fit-To-Size.png")
+#pragma link("dying_dot.png")
+#pragma link("alive_dot.png")
+#pragma link("Drag_Mode.png")
+#pragma link("Touch_Mode.png")
+#pragma link("wtouch.png")
+#pragma link("off.png")
+
+-- ICO --
+#pragma link("Touch.ico")
+#pragma link("morfo.ico")
+
+

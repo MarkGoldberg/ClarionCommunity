@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+# Clarion 2.1.0.2447
+Project("{12B76EC0-1D7B-4FA7-A7D0-C524288B48A1}") = "touch", "touch.cwproj", "{94D5322F-B4C9-4EFA-B2FA-8067A82609C8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Touch Classes", "Touch Classes", "{CA8BD5B1-DDFB-43BA-A3AB-2D726837DCBD}"
+	ProjectSection(SolutionItems) = postProject
+		touch.clw = touch.clw
+		touch.inc = touch.inc
+		touchdef.inc = touchdef.inc
+		TouchHelper.inc = TouchHelper.inc
+		Responders.clw = Responders.clw
+		Responders.inc = Responders.inc
+		TouchHelper.clw = TouchHelper.clw
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "General Classes", "General Classes", "{BC3C5A5D-6179-4B91-AF9C-9634E66A8A63}"
+	ProjectSection(SolutionItems) = postProject
+		ctTechData.clw = ctTechData.clw
+		ctTechData.inc = ctTechData.inc
+		ctIDInfo.inc = ctIDInfo.inc
+		ctIDInfo.clw = ctIDInfo.clw
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LibsrcWin", "LibsrcWin", "{87839C21-D688-44A5-B618-FA58C18F9D15}"
+	ProjectSection(SolutionItems) = postProject
+		CWTOUCH.CLW = CWTOUCH.CLW
+		CWTOUCH.INC = CWTOUCH.INC
+		CWTOUCHDEF.INC = CWTOUCHDEF.INC
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Acessories", "Acessories", "{EAA3BC6E-1B3E-4574-A4B1-3724BFD66B93}"
+	ProjectSection(SolutionItems) = postProject
+		WindowManagerTouch.clw = WindowManagerTouch.clw
+		WindowManagerTouch.inc = WindowManagerTouch.inc
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{94D5322F-B4C9-4EFA-B2FA-8067A82609C8}.Debug|Win32.Build.0 = Debug|Win32
+		{94D5322F-B4C9-4EFA-B2FA-8067A82609C8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{94D5322F-B4C9-4EFA-B2FA-8067A82609C8}.Release|Win32.Build.0 = Release|Win32
+		{94D5322F-B4C9-4EFA-B2FA-8067A82609C8}.Release|Win32.ActiveCfg = Release|Win32
+	EndGlobalSection
+EndGlobal
