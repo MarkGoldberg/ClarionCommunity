@@ -6,21 +6,18 @@ Project("{12B76EC0-1D7B-4FA7-A7D0-C524288B48A1}") = "touch", "touch.cwproj", "{9
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Touch Classes", "Touch Classes", "{CA8BD5B1-DDFB-43BA-A3AB-2D726837DCBD}"
 	ProjectSection(SolutionItems) = postProject
-		touch.clw = touch.clw
-		touch.inc = touch.inc
-		touchdef.inc = touchdef.inc
-		TouchHelper.inc = TouchHelper.inc
-		Responders.clw = Responders.clw
-		Responders.inc = Responders.inc
-		TouchHelper.clw = TouchHelper.clw
+		TouchHelper.inc = ..\..\Shared\src\TouchHelper.inc
+		Responders.clw = ..\..\Shared\src\Responders.clw
+		Responders.inc = ..\..\Shared\src\Responders.inc
+		TouchHelper.clw = ..\..\Shared\src\TouchHelper.clw
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "General Classes", "General Classes", "{BC3C5A5D-6179-4B91-AF9C-9634E66A8A63}"
 	ProjectSection(SolutionItems) = postProject
-		ctTechData.clw = ctTechData.clw
-		ctTechData.inc = ctTechData.inc
-		ctIDInfo.inc = ctIDInfo.inc
-		ctIDInfo.clw = ctIDInfo.clw
+		ctTechData.clw = ..\..\Shared\src\ctTechData.clw
+		ctTechData.inc = ..\..\Shared\src\ctTechData.inc
+		ctIDInfo.inc = ..\..\Shared\src\ctIDInfo.inc
+		ctIDInfo.clw = ..\..\Shared\src\ctIDInfo.clw
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LibsrcWin", "LibsrcWin", "{87839C21-D688-44A5-B618-FA58C18F9D15}"
@@ -32,8 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LibsrcWin", "LibsrcWin", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Acessories", "Acessories", "{EAA3BC6E-1B3E-4574-A4B1-3724BFD66B93}"
 	ProjectSection(SolutionItems) = postProject
-		WindowManagerTouch.clw = WindowManagerTouch.clw
-		WindowManagerTouch.inc = WindowManagerTouch.inc
+		WindowManagerTouch.clw = ..\..\Shared\src\ABC\WindowManagerTouch.clw
+		WindowManagerTouch.inc = ..\..\Shared\src\ABC\WindowManagerTouch.inc
 	EndProjectSection
 EndProject
 Global
