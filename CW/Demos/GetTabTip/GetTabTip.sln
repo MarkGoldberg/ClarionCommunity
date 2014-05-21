@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+# Clarion 2.1.0.2447
+Project("{12B76EC0-1D7B-4FA7-A7D0-C524288B48A1}") = "GetTabTip", "GetTabTip.cwproj", "{66E97EC7-BB4E-4DCC-84EE-9A13655AF8B0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{66E97EC7-BB4E-4DCC-84EE-9A13655AF8B0}.Debug|Win32.Build.0 = Debug|Win32
+		{66E97EC7-BB4E-4DCC-84EE-9A13655AF8B0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{66E97EC7-BB4E-4DCC-84EE-9A13655AF8B0}.Release|Win32.Build.0 = Release|Win32
+		{66E97EC7-BB4E-4DCC-84EE-9A13655AF8B0}.Release|Win32.ActiveCfg = Release|Win32
+	EndGlobalSection
+EndGlobal
