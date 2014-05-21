@@ -1,7 +1,7 @@
 
-*.clw = C:\tmp\ClarionCommunity\ClarionCommunity-master\ClarionCommunity-master\CW\Shared\Src
-*.inc = C:\tmp\ClarionCommunity\ClarionCommunity-master\ClarionCommunity-master\CW\Shared\Src
-*.int = C:\tmp\ClarionCommunity\ClarionCommunity-master\ClarionCommunity-master\CW\Shared\Src
+*.clw = ..\..\Shared\Src
+*.inc = ..\..\Shared\Src
+*.int = ..\..\Shared\Src
 
 
 -- Add paths that are effective for all configurations
