@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+# Clarion 2.1.0.2447
+Project("{12B76EC0-1D7B-4FA7-A7D0-C524288B48A1}") = "CopyConstructor", "CopyConstructor.cwproj", "{89D2116B-AABB-49D2-8A70-455ADBE5F2F0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{89D2116B-AABB-49D2-8A70-455ADBE5F2F0}.Debug|Win32.Build.0 = Debug|Win32
+		{89D2116B-AABB-49D2-8A70-455ADBE5F2F0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{89D2116B-AABB-49D2-8A70-455ADBE5F2F0}.Release|Win32.Build.0 = Release|Win32
+		{89D2116B-AABB-49D2-8A70-455ADBE5F2F0}.Release|Win32.ActiveCfg = Release|Win32
+	EndGlobalSection
+EndGlobal
