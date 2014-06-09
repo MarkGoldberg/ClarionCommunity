@@ -28,6 +28,12 @@ ToString PROCEDURE(),STRING
 oYada1  ctYada
 oYada2  &ctYada     
 oYada3  &ctYada
+
+oYadaXYZ  CLASS(ctYada)
+Z           LONG
+ToString PROCEDURE(),STRING
+          END
+
   CODE
   oYada1.X = 47
   oYada1.Y = 100
@@ -35,10 +41,15 @@ oYada3  &ctYada
   oYada2 &= oYada1.Copy()
 
   oYada3 &= oYada3._New(42, 47)
+  
+  oYadaXYZ.X = 1
+  oYadaXYZ.Y = 22
+  oYadaXYZ.Z = 333
 
   MESSAGE('oYada1[ '& oYada1.TOSTRING() &' ]|' & |
           'oYada2[ '& oYada2.TOSTRING() &' ]|' & |
-          'oYada3[ '& oYada3.TOSTRING() &' ]')
+          'oYada3[ '& oYada3.TOSTRING() &' ]|' & |
+          'oYadaXYZ[ '& oYadaXYZ.TOSTRING() &' ]')
 
 
 ctYada._New     PROCEDURE(LONG XValue, LONG YValue)!,*ctYada
@@ -58,8 +69,10 @@ Answer  &ctYada
   RETURN Answer
 
 CopyAllProperties ROUTINE
-
-   memcpy( Answer, SELF, SIZE(SELF))
+   
+   memcpy( Answer, SELF, SIZE(Answer)) 
+    ! it's dangerous to use SIZE(SELF) as it could be derived, 
+    ! we know that SIZE(Answer) will be <= SIZE(SELF)
   
   !Answer = SELF !works, but get:  Warning!! : Unusual type conversion
 
@@ -68,7 +81,9 @@ CopyAllProperties ROUTINE
 
 ctYada.ToString PROCEDURE()!,STRING
   CODE
-  RETURN 'X['& SELF.X &'] Y['& SELF.Y &']'
+  RETURN 'X['& SELF.X &'] Y['& SELF.Y &'] SIZE(SELF)['& SIZE(SELF) &']'
 
-
+oYadaXYZ.ToString PROCEDURE()!,STRING
+  CODE
+  RETURN PARENT.ToString() & ' Z['& SELF.Z &']'
  
