@@ -20,20 +20,35 @@ OMIT('***')
 ctYada CLASS,TYPE
 X        LONG
 Y        LONG
+_New     PROCEDURE(LONG XValue, LONG YValue),*ctYada
 Copy     PROCEDURE(),*ctYada
 ToString PROCEDURE(),STRING
        END
 
 oYada1  ctYada
 oYada2  &ctYada     
+oYada3  &ctYada
   CODE
   oYada1.X = 47
   oYada1.Y = 100
 
   oYada2 &= oYada1.Copy()
 
+  oYada3 &= oYada3._New(42, 47)
+
   MESSAGE('oYada1[ '& oYada1.TOSTRING() &' ]|' & |
-          'oYada2[ '& oYada2.TOSTRING() &' ]')
+          'oYada2[ '& oYada2.TOSTRING() &' ]|' & |
+          'oYada3[ '& oYada3.TOSTRING() &' ]')
+
+
+ctYada._New     PROCEDURE(LONG XValue, LONG YValue)!,*ctYada
+Answer  &ctYada
+  CODE
+  Answer &= NEW ctYada 
+  Answer.X = XValue
+  Answer.Y = YValue
+  RETURN Answer
+  
 
 ctYada.Copy PROCEDURE()!,*ctYada
 Answer  &ctYada
