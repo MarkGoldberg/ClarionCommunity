@@ -1,0 +1,4 @@
+LIBRARY 'WrapRun' GUI
+EXPORTS
+  WRAPRUN@FRsc @?
+  
