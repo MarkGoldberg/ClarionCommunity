@@ -15,8 +15,8 @@ RUN:ReturmImm          EQUATE(0)
 RUN:WaitUntilCompleted EQUATE(1)
 
   MAP
-  	Run_ReturnRightAway   (*CSTRING Command)
-  	Run_WaitUntilCompleted(*CSTRING Command)
+  	Run_ReturnRightAway   (*CSTRING Command),NAME('Run_ReturnRightAway')
+  	Run_WaitUntilCompleted(*CSTRING Command),NAME('Run_WaitUntilCompleted')
   END
   CODE
 
