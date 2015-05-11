@@ -535,7 +535,7 @@ j         USHORT
    !Added code to pares the first character of the module name as when a .Net unmanaged dll
    !A \ seems to be generated as first character
    if EXE:cstringval[1] = '\' THEN
-	 EXE:cstringval = EXE:cstringval[2:256]
+	 EXE:cstringval = EXE:cstringval[2:128]
    END
    ExportQ.Module    = EXE:cstringval
    ExportQ.Symbol    = EXE:cstringval
