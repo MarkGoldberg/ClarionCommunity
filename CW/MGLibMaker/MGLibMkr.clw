@@ -152,7 +152,7 @@ icon        LONG          !AB (was short)
 treelevel   SHORT
 ordinal         USHORT
 !Modified by MJS to allow for longer file names
-module      STRING(60)
+module      STRING(FILE:MaxFilePath)
 orgorder    LONG          !AB
 SearchFlag  Byte          !MG (enum field, see SearchFlag::* below)
           END
@@ -535,7 +535,7 @@ j         USHORT
    !Added code to pares the first character of the module name as when a .Net unmanaged dll
    !A \ seems to be generated as first character
    if EXE:cstringval[1] = '\' THEN
-	 EXE:cstringval = EXE:cstringval[2:128]
+	 EXE:cstringval = EXE:cstringval[2:SIZE(EXE:cstringval)]
    END
    ExportQ.Module    = EXE:cstringval
    ExportQ.Symbol    = EXE:cstringval
