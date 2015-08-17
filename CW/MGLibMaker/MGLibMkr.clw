@@ -150,8 +150,9 @@ ColorSFG    LONG    !Selected Foreground color for FName
 ColorSBG    LONG    !Selected Background color for FName
 icon        LONG          !AB (was short)
 treelevel   SHORT
-ordinal     USHORT
-module      STRING(20)
+ordinal         USHORT
+!Modified by MJS to allow for longer file names
+module      STRING(FILE:MaxFilePath)
 orgorder    LONG          !AB
 SearchFlag  Byte          !MG (enum field, see SearchFlag::* below)
           END
@@ -531,6 +532,11 @@ j         USHORT
    Ordinals      = EXE:exp_AddrOrds
    Base          = EXE:exp_Base
    GET(EXEfile, EXE:exp_Name-ImageBase+1, SIZE(EXE:cstringval))
+   !Added code to pares the first character of the module name as when a .Net unmanaged dll
+   !A \ seems to be generated as first character
+   if EXE:cstringval[1] = '\' THEN
+	 EXE:cstringval = EXE:cstringval[2:SIZE(EXE:cstringval)]
+   END
    ExportQ.Module    = EXE:cstringval
    ExportQ.Symbol    = EXE:cstringval
    ExportQ.treelevel = 1
