@@ -9,3 +9,5 @@ IsAutoShowingTouchKeyboard  BOOL
 Open                        PROCEDURE(*Window pWindow,<*Window pOwner>),DERIVED
 OnSelected                  PROCEDURE(),LONG               
                    END
+
+! vim: set filetype=clarion:

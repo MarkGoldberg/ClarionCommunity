@@ -20,3 +20,4 @@ Add             PROCEDURE(LONG xID, ? xInfo)
 Records         PROCEDURE(),LONG
             END
 
+! vim: set filetype=clarion:

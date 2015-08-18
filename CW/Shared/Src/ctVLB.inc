@@ -25,4 +25,4 @@ HandleCol      PROCEDURE(SHORT xCol),STRING,VIRTUAL
 
 !end       OMIT('*** ifdef ctVLB ***',ifDef_ctVLB)
 
-
+! vim: set filetype=clarion:

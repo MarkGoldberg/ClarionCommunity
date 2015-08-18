@@ -172,3 +172,4 @@ exp_AddrOrds    ULONG
 
 newoffset ULONG   ! File offset to NE/PE header
 
+! vim: set filetype=clarion:
