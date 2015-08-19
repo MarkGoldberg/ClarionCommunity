@@ -321,3 +321,5 @@ CONSTRUCT                   PROCEDURE !self.MG_Init('AutoInit')
 ! MG       Sept/21/09  Fixed a bug in .DumpControls, which could GPF
 !  @=======================================================================================
 !  omit('***** documentation *****')
+
+! vim: set filetype=clarion:

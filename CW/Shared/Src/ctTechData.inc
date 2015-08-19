@@ -15,3 +15,5 @@ HideData       PROCEDURE
 Log            PROCEDURE(LONG xID, ? xInfo)
 DebugOne       PROCEDURE()
             END
+
+! vim: set filetype=clarion:

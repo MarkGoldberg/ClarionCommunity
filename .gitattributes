@@ -20,3 +20,6 @@
 *.ico binary
 *.dct binary
 *.app binary
+
+# identify *.inc files as being Clarion
+*.inc linguist-language=Clarion

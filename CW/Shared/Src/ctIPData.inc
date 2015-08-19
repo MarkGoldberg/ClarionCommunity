@@ -20,3 +20,4 @@ StartHeartBeat  PROCEDURE()
 Open            PROCEDURE(*FILE inFile)
         END
 
+! vim: set filetype=clarion:

@@ -23,3 +23,5 @@ ShowWhenNotZero            PROCEDURE(STRING xName, ? xValue),STRING
 
 
              END
+
+! vim: set filetype=clarion:

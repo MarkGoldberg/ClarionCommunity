@@ -64,4 +64,4 @@ ResetOrigPosition Procedure(<long argFEQ>) !to get rid of splitter construct of 
 
 !Last Revised:  June 15,2005 -- Aded sOrient,sPercent with the goal of Add_ResizeQ(long argFEQ)
 
-
+! vim: set filetype=clarion:
