@@ -458,43 +458,55 @@ FileAdded            ROUTINE
 !========================================================================================
 !========================================================================================
 ReadExecutable       PROCEDURE !gets export table from 16 or 32-bit file or LIB file
-sectheaders ULONG   ! File offset to section headers
-sections    USHORT  ! File offset to section headers
-VAexport    ULONG   ! Virtual address of export table, according to data directory
                     ! This is used as an alternative way to find table if .edata not found
    CODE
    OPEN(EXEfile, 0)
-   GET(EXEfile, 1, SIZE(EXE:DOSheader))
-   IF EXE:dos_magic = 'MZ' THEN
-     newoffset = EXE:dos_lfanew
-     GET(EXEfile, newoffset+1, SIZE(EXE:PEheader))
-     IF EXE:pe_signature = 04550H THEN
-       sectheaders = EXE:pe_optsize+newoffset+SIZE(EXE:PEheader)
-       sections = EXE:pe_nsect
-       ! Read the "Optional header"
-       GET(EXEfile, newoffset+SIZE(EXE:PEheader)+1, SIZE(EXE:Optheader))
-       IF EXE:opt_DataDirNum THEN
-          ! First data directory describes where to find export table
-          GET(EXEfile, newoffset+SIZE(EXE:PEheader)+SIZE(EXE:OptHeader)+1,SIZE(EXE:DataDir))
-          VAexport = EXE:data_VirtualAddr
-       END
+   GET (EXEfile, 1, SIZE(EXE:DOSheader))
+   IF EXE:dos_magic = 'MZ' 
+                  newoffset = EXE:dos_lfanew
+     GET(EXEfile, newoffset + 1, SIZE(EXE:PEheader))
 
-       LOOP i# = 1 TO sections
-         GET(EXEfile,sectheaders+1,SIZE(EXE:sectheader))
-         sectheaders += SIZE(EXE:sectheader)
-         IF EXE:sh_SectName = '.edata' THEN
-            DumpPEExportTable(EXE:sh_VirtAddr, EXE:sh_VirtAddr - EXE:sh_rawptr)
-         ELSIF EXE:sh_VirtAddr <= VAexport AND |
-               EXE:sh_VirtAddr+EXE:sh_RawSize > VAexport
-            DumpPEExportTable(VAexport, EXE:sh_VirtAddr - EXE:sh_rawptr)
-         END
-       END
+     IF EXE:pe_signature = 04550H 
+       DO ReadExecutable:PE 
+
      ELSE
        GET(EXEfile, newoffset+1, SIZE(EXE:NEheader))
-       DumpNEExports
+       DumpNEExports()
      END
    END
    CLOSE(EXEfile)
+
+ReadExecutable:PE ROUTINE 
+  DATA 
+sectheaders ULONG   ! File offset to section headers
+sections    USHORT  ! File offset to section headers
+VAexport    ULONG   ! Virtual address of export table, according to data directory
+  CODE        
+  sectheaders = EXE:pe_optsize + newoffset + SIZE(EXE:PEheader)
+  sections    = EXE:pe_nsect
+ 
+  ! Read the "Optional header"
+  GET(EXEfile, newoffset + SIZE(EXE:PEheader) + 1, SIZE(EXE:Optheader))
+ 
+  IF EXE:opt_DataDirNum 
+     ! First data directory describes where to find export table
+     GET(EXEfile, newoffset + SIZE(EXE:PEheader) + SIZE(EXE:OptHeader) + 1,SIZE(EXE:DataDir))
+     VAexport = EXE:data_VirtualAddr
+  END
+ 
+  LOOP sections TIMES 
+    GET(EXEfile,sectheaders+1 ,SIZE(EXE:sectheader))
+                sectheaders += SIZE(EXE:sectheader)
+ 
+    IF EXE:sh_SectName = '.edata' 
+       DumpPEExportTable(EXE:sh_VirtAddr, EXE:sh_VirtAddr - EXE:sh_rawptr)
+ 
+    ELSIF EXE:sh_VirtAddr                 <= VAexport   |
+      AND EXE:sh_VirtAddr + EXE:sh_RawSize > VAexport   |
+    THEN
+       DumpPEExportTable(VAexport       , EXE:sh_VirtAddr - EXE:sh_rawptr)
+    END
+  END
 
 !========================================================================================
 DumpPEExportTable    PROCEDURE(VirtualAddress, ImageBase) !gets export table from a PE format file (32-bit)
