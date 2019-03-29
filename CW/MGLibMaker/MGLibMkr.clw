@@ -1,4 +1,4 @@
-     PROGRAM
+ PROGRAM
 
 !Updated 2014-Jan-14 By Mark Goldberg 
 !  - Added Ability to Generate Classes (no parameters )
@@ -100,10 +100,10 @@
         WriteLib
         ReadLib
         InfoWindow
-        GenerateMap         (byte argRonsFormat)
+        GenerateMap        (byte argRonsFormat)
         SelectQBE  
         SetThisColor       (Long argNFG, Long argNBG,*FormatColorSet argFCS)
-        SetGloColors
+        SetGloColors       
 		  ExportQ_to_FilterQ
 		  GenerateClasses
         LongestSymbol      (),LONG   !in ExportQ Level 2
@@ -127,104 +127,80 @@ NBG                 Long
 SFG                 Long
 SBG                 Long
                   end
-Glo     Group
-Colors      Group
-Defaults      Like(FormatColorSet),dim(2)
-Found         Like(FormatColorSet),dim(2)
-            end
-SortOrder   String('Original')
-DisplayCount uLong
-FoundCount   uLong !MG Added 12/7/01
-RonsFormat   byte
-        END !glo
 
+Glo               GROUP
+Colors               Group
+Defaults               Like(FormatColorSet),dim(2)
+Found                  Like(FormatColorSet),dim(2)
+                     end
+SortOrder            String('Original')
+DisplayCount         uLong
+FoundCount           uLong 
+RonsFormat           byte
+                  END 
 
 
 
 
 ExportQ   QUEUE,PRE(EXQ)
 symbol      STRING(128)
-ColorNFG    LONG    !Normal Foreground color for FName
-ColorNBG    LONG    !Normal Background color for FName
+ColorNFG    LONG    !Normal   Foreground color for FName
+ColorNBG    LONG    !Normal   Background color for FName
 ColorSFG    LONG    !Selected Foreground color for FName
 ColorSBG    LONG    !Selected Background color for FName
 icon        LONG          !AB (was short)
 treelevel   SHORT
-ordinal         USHORT
-!Modified by MJS to allow for longer file names
-module      STRING(FILE:MaxFilePath)
-orgorder    LONG          !AB
+ordinal     USHORT
+module      STRING(FILE:MaxFilePath)  !Modified by MJS to allow for longer file names
+
+orgorder    LONG          
 SearchFlag  Byte          !MG (enum field, see SearchFlag::* below)
           END
 
 ASCIIfile  FILE,DRIVER('ASCII'),PRE(ASCII),CREATE,NAME(FileName)
-            Record
-Line          String(2 * Size(ExportQ.symbol) + 30)
-            END
-          End
+              RECORD
+Line            STRING(2 * SIZE(ExportQ.symbol) + 30)
+              END
+           END
           
 !Region - Tmp Region          
 FilteredQ QUEUE(ExportQ),PRE(FLTQ)
           END
 
 
-SearchFlag::Default       Equate(0)
-SearchFlag::Found         Equate(1)
 
-LOC:FoundRec  LONG        !AB   (mg, shows found count on the window -- todo)
+LOC:FoundRec  LONG        
 
 
-window WINDOW('MGLibMkr'),AT(,,288,207),CENTER,GRAY,IMM,SYSTEM,ICON('LIBRARY.ICO'), |
-         FONT('Segoe UI'),ALRT(DeleteKey),DROPID('~FILE'),RESIZE
-      TOOLBAR,AT(0,0,288,41),USE(?TOOLBAR1)
-         BUTTON('&O'),AT(2,2,14,14),USE(?AddFile),ICON(ICON:Open),TIP('Open / Ad' & |
-               'd File... (ALT+0)'),FLAT,LEFT
-         BUTTON('&S'),AT(19,2,14,14),USE(?SaveAs),DISABLE,ICON(ICON:Save), |
-               TIP('Save .LIB As... (ALT+S)'),FLAT,LEFT
-         BUTTON,AT(36,2,14,14),USE(?Clear),DISABLE,ICON('clear.ico'),TIP('Empty ' & |
-               'the listbox'),FLAT,LEFT
-         BUTTON,AT(53,2,14,14),USE(?Exit),STD(STD:Close),ICON('Exit.ico'), |
-               TIP('Exit the program'),FLAT,LEFT
-         BUTTON,AT(87,2,14,14),USE(?Info),ICON(ICON:Help),TIP('Info'),FLAT,LEFT
-         BUTTON('Generate CW &Map'),AT(135,4,81,10),USE(?MakeMap),DISABLE, |
-               TIP('A head start on making a CW Map ...'),FLAT,LEFT
-         CHECK('Rons Format'),AT(222,5),USE(glo.RonsFormat)
-         BUTTON('Generate Classes'),AT(135,16,81,10),USE(?GenerateClasses),DISABLE, |
-               TIP('A head start on making a CW Classes...'),FLAT,LEFT
-         OPTION('Sort Order'),AT(4,16,123,23),USE(glo.SortOrder),BOXED
-            RADIO('Original'),AT(8,24,37,13),USE(?glo:SortOrder:Radio1), |
-                  ICON('Blank.ico')
-            RADIO('Function'),AT(47,24,37,13),USE(?glo:SortOrder:Radio2), |
-                  ICON('Blank.ico')
-            RADIO('Ordinal'),AT(86,24,37,13),USE(?glo:SortOrder:Radio3), |
-                  ICON('Blank.ico')
+window WINDOW('MGLibMkr')                 ,AT(   ,   ,288,207),CENTER,GRAY,IMM,SYSTEM,ICON('LIBRARY.ICO'), FONT('Segoe UI'),ALRT(DeleteKey),DROPID('~FILE'),RESIZE
+      TOOLBAR                             ,AT(  0,  0,288, 41),USE(?TOOLBAR1)
+         BUTTON('&O')                     ,AT(  2,  2, 14, 14),USE(?AddFile)                             ,ICON(ICON:Open)     ,TIP('Open / Add File... (ALT+0)')             ,FLAT,LEFT
+         BUTTON('&S')                     ,AT( 19,  2, 14, 14),USE(?SaveAs)                      ,DISABLE,ICON(ICON:Save)     ,TIP('Save .LIB As... (ALT+S)')                ,FLAT,LEFT
+         BUTTON                           ,AT( 36,  2, 14, 14),USE(?Clear)                       ,DISABLE,ICON('clear.ico')   ,TIP('Empty the listbox')                      ,FLAT,LEFT
+         BUTTON                           ,AT( 53,  2, 14, 14),USE(?Exit)                                ,ICON('Exit.ico')    ,TIP('Exit the program')                       ,FLAT,LEFT              ,STD(STD:Close)
+         BUTTON('&F')                     ,AT( 70, 4,  14, 12),USE(?FindButton)                  ,DISABLE,ICON('Cs_srch.ico') ,TIP('Search for string (ALT+F)')              ,FLAT,LEFT
+         BUTTON                           ,AT( 87,  2, 14, 14),USE(?Info)                                ,ICON(ICON:Help)     ,TIP('Info')                                   ,FLAT,LEFT
+         BUTTON('Generate CW &Map')       ,AT(127,  4, 81, 10),USE(?MakeMap)                     ,DISABLE                     ,TIP('A head start on making a CW Map ...')    ,FLAT,LEFT
+         CHECK('Rons Format')             ,AT(222,  5        ),USE(glo.RonsFormat)                                            ,TIP('Machine readable format when generating a map')
+         BUTTON('Generate Classes')       ,AT(127, 16, 81, 10),USE(?GenerateClasses)             ,DISABLE                     ,TIP('A head start on making a CW Classes...') ,FLAT,LEFT
+         OPTION('Sort Order')             ,AT(  4, 16,123, 23),USE(glo.SortOrder)           ,BOXED
+            RADIO('Original')             ,AT(  8, 24, 37, 13),USE(?glo:SortOrder:Radio1)                ,ICON(ICON:None)
+            RADIO('Function')             ,AT( 47, 24, 37, 13),USE(?glo:SortOrder:Radio2)                ,ICON(ICON:None)
+            RADIO('Ordinal')              ,AT( 86, 24, 37, 13),USE(?glo:SortOrder:Radio3)                ,ICON(ICON:None)
          END
-         PROMPT('Found Count'),AT(127,29,48,8),USE(?GLO:FoundCount:Prompt),TRN, |
-               FONT('Arial',8,COLOR:Blue,FONT:regular,CHARSET:ANSI),RIGHT
-         STRING(@n6),AT(173,29,,8),USE(glo.FoundCount),TRN,RIGHT(1),FONT(,, |
-               COLOR:Blue,,CHARSET:ANSI)
-         STRING('Total Count'),AT(210,29,38,8),USE(?GLO:DisplayCount:Prompt),TRN,RIGHT, |
-               FONT('Arial',8,,FONT:regular,CHARSET:ANSI)
-         STRING(@n6),AT(246,29,,8),USE(glo.DisplayCount),TRN,RIGHT(1)
-         BUTTON('&F'),AT(70,4,14,12),USE(?FindButton),DISABLE,FONT('MS Sans Seri' & |
-               'f',8,,FONT:regular),ICON('Cs_srch.ico'),TIP('Search for string (' & |
-               'ALT+F)'),FLAT,LEFT
       END
-      SHEET,AT(4,4,283,160),USE(?SHEET)
-         TAB('All'),USE(?TAB:All)
-            LIST,AT(8,20,272,138),USE(?List1),DISABLE,VSCROLL,FONT('Arial',8,, |
-                  FONT:regular),COLUMN,VCR,FROM(ExportQ),FORMAT('143L(2)|M*IT~Mo' & |
-                  'dule and function~30R(3)~Ordinal~@N_5B@')
+      SHEET                               ,AT(  4,  4,283,160),USE(?SHEET),SPREAD
+         TAB('All')                                           ,USE(?Tab:All)
+            LIST                          ,AT(  8, 20,272,138),USE(?List1)                       ,DISABLE,COLUMN,VCR,VSCROLL,FROM(ExportQ)  ,FORMAT('143L(2)|M*T~Module and Procedures~30R(3)~Ordinal~@N_5B@')
          END
-         TAB('Filtered Only'),USE(?TAB:Filtered)
-            LIST,AT(8,24,272,138),USE(?Filtered),DISABLE,VSCROLL,FONT('Arial',8, |
-                  ,FONT:regular),COLUMN,VCR,FROM(FilteredQ),FORMAT('143L(2)|M*IT' & |
-                  '~Module and function~30R(3)~Ordinal~@N_5B@')
+         TAB('Matches to Search Only--- [0]')                    ,USE(?Tab:Filtered)                ,FONT(,,COLOR:Blue)
+            LIST                          ,AT(  8, 24,272,138),USE(?Filtered)                    ,DISABLE,COLUMN,VCR,VSCROLL,FROM(FilteredQ),FORMAT('143L(2)|M*T~Module and Procedures~30R(3)~Ordinal~@N_5B@')
          END
       END
    END
 
-! LIST,AT(172,23,164,151),USE(?SearchList),HIDE,VSCROLL,FONT('MS Sans Serif',8,,FONT:regular),FORMAT('45L(1)|M~Module~@S20@87L(1)|M~Symbol~@S40@20R(1)|~Ordinal~L@N_5@'),FROM(FQ)
+SearchFlag::Default Equate(0)
+SearchFlag::Found   Equate(1)
 
    CODE
    DO PreAccept
@@ -233,7 +209,7 @@ window WINDOW('MGLibMkr'),AT(,,288,207),CENTER,GRAY,IMM,SYSTEM,ICON('LIBRARY.ICO
 
 !------------------------------------------------------
 PostAccept           ROUTINE
-   MGResizeClass.Close_Class
+   MGResizeClass.Close_Class()
    if ~0{prop:Iconize}
       PutIni('Position','X',0{prop:XPOS } ,qINI_FILE)
       PutIni('Position','Y',0{prop:YPOS } ,qINI_FILE)
@@ -247,11 +223,12 @@ PreAccept            ROUTINE
    SetGloColors()
    OPEN(window)
    System{prop:Icon} = window{prop:icon} !Have any non-minimize-able additional windows share the same Icon
-   ExportQ.orgorder = 0       !AB
+   ExportQ.orgorder = 0   
 
    ! ?list1{prop:vcr}=TRUE   !Suppress the ? button in the vcr
    window {PROP:minheight}  = 76
    window {PROP:minwidth }  = window{PROP:width}
+
    MGResizeClass.Init_Class(window)
    MGResizeClass.Add_ResizeQ(?List1          ,'L/T R/B')
    MGResizeClass.Add_ResizeQ(?Filtered       ,'L/T R/B')
@@ -382,6 +359,7 @@ Accepted:MakeMap  ROUTINE
         END
      END
    END
+
 Accepted:Clear ROUTINE       
    FREE(ExportQ); FREE(FilteredQ)   
    Window{PROP:Text} = 'LibMaker'
@@ -399,12 +377,12 @@ Accepted:SaveAs   ROUTINE
    IF RECORDS(ExportQ)>0
      Clear(FileName) !FileName = WriteFileName
      IF FileDialog('Save OMF library definition as ...', FileName, 'Library files (*.lib)|*.lib',FILE:Save+FILE:LongName)
-        Window{PROP:Text} = 'LibMaker - ' & CLIP(FileName) !AB
-        SetCursor(CURSOR:Wait)                             !AB
-        SORT(ExportQ  ,ExportQ.orgorder)                         !AB
+        Window{PROP:Text} = 'LibMaker - ' & CLIP(FileName)
+        SetCursor(CURSOR:Wait)                            
+        SORT(ExportQ  ,ExportQ.orgorder)                        
         SORT(FilteredQ,FLTQ:orgorder)                         
         WriteLib
-        SetCursor()                                        !AB
+        SetCursor()                                       
         !WriteFileName = FileName
      END
    END
@@ -521,28 +499,27 @@ Names     ULONG
 Ordinals  ULONG
 Base      ULONG
 
-j         USHORT
-
-
-
+j         LONG,AUTO
    CODE
-   GET(EXEfile, VirtualAddress-ImageBase+1, SIZE(EXE:ExpDirectory))
+   GET(EXEfile, VirtualAddress - ImageBase + 1, SIZE(EXE:ExpDirectory))
    NumNames      = EXE:exp_NumNames
    Names         = EXE:exp_AddrNames
    Ordinals      = EXE:exp_AddrOrds
    Base          = EXE:exp_Base
-   GET(EXEfile, EXE:exp_Name-ImageBase+1, SIZE(EXE:cstringval))
-   !Added code to pares the first character of the module name as when a .Net unmanaged dll
+
+   GET(EXEfile, EXE:exp_Name   - ImageBase + 1, SIZE(EXE:cstringval))
+   !Added code to parse the first character of the module name as when a .Net unmanaged dll
    !A \ seems to be generated as first character
-   if EXE:cstringval[1] = '\' THEN
-	 EXE:cstringval = EXE:cstringval[2:SIZE(EXE:cstringval)]
+   IF EXE:cstringval[1] = '\' 
+	 EXE:cstringval   = EXE:cstringval[ 2 : SIZE(EXE:cstringval) ]
    END
+
    ExportQ.Module    = EXE:cstringval
    ExportQ.Symbol    = EXE:cstringval
    ExportQ.treelevel = 1
    ExportQ.icon      = 1
    ExportQ.ordinal   = 0
-   ExportQ.orgorder += 1  !AB
+   ExportQ.orgorder += 1 
    !glo.Colors.Defaults[1]
 
    ExportQ.SearchFlag= SearchFlag::Default
@@ -558,13 +535,16 @@ j         USHORT
    ExportQ.ColorNBG  = glo.Colors.Defaults[2].NBG  !LONG    !Normal   Background color
    ExportQ.ColorSFG  = glo.Colors.Defaults[2].SFG  !LONG    !Selected Foreground color
    ExportQ.ColorSBG  = glo.Colors.Defaults[2].SBG  !LONG    !Selected Background color
-   LOOP j = 0 TO NumNames-1
+
+   LOOP j = 0 TO NumNames - 1
       GET(EXEfile, Names    + j*4 - ImageBase+1, SIZE(EXE:ulongval))
       GET(EXEfile, EXE:ulongval   - ImageBase+1, SIZE(EXE:cstringval))
       ExportQ.symbol = EXE:cstringval
+
       GET(EXEfile, Ordinals + j*2 - ImageBase+1, SIZE(EXE:ushortval))
       ExportQ.ordinal = EXE:ushortval+Base
-      ExportQ.orgorder +=1   !AB
+
+      ExportQ.orgorder +=1  
       ADD(ExportQ)
    END
 
@@ -625,7 +605,7 @@ r  ULONG
    ExportQ.ordinal    = 0
    ExportQ.treelevel  = 1
    ExportQ.icon       = 1
-   ExportQ.orgorder  +=1   !AB
+   ExportQ.orgorder  += 1 
    ExportQ.SearchFlag = SearchFlag::Default
    ExportQ.ColorNFG   = glo.Colors.Defaults[1].NFG  !LONG    !Normal   Foreground color
    ExportQ.ColorNBG   = glo.Colors.Defaults[1].NBG  !LONG    !Normal   Background color
@@ -645,32 +625,37 @@ r  ULONG
    ExportQ.ColorSBG  = glo.Colors.Defaults[2].SBG  !LONG    !Selected Background color
    LOOP
      GET(EXEfile, r, SIZE(EXE:pstringval))
-     IF LEN(EXE:pstringval)=0 THEN
+     IF LEN(EXE:pstringval)=0
        BREAK
      END
      ExportQ.symbol = EXE:pstringval
-     r += LEN(EXE:pstringval)+1
-     GET(EXEfile, r, SIZE(EXE:ushortval))
-     r += 2
-     ExportQ.ordinal = EXE:ushortval
-     ExportQ.orgorder +=1   !AB
+
+                  r += LEN(EXE:pstringval)+1
+     GET(EXEfile, r,  SIZE(EXE:ushortval))
+                  r += 2
+
+     ExportQ.ordinal   = EXE:ushortval
+     ExportQ.orgorder +=1
      ADD(ExportQ)
    END
 
 ! Now pull apart the non-resident name table. First entry is the description, and is skipped
    GET(EXEfile, j, SIZE(EXE:pstringval)) ;    j += LEN(EXE:pstringval)+1
    GET(EXEfile, j, SIZE(EXE:ushortval))  ;    j += 2
+
    LOOP
      GET(EXEfile, j, SIZE(EXE:pstringval))
-     IF LEN(EXE:pstringval)=0 THEN
+     IF LEN(EXE:pstringval) = 0
        BREAK
      END
      ExportQ.symbol = EXE:pstringval
-     j += LEN(EXE:pstringval)+1
+
+                  j += LEN(EXE:pstringval)+1
      GET(EXEfile, j, SIZE(EXE:ushortval))
-     j += 2
-     ExportQ.ordinal = EXE:ushortval
-     ExportQ.orgorder +=1   !AB
+                  j += 2
+
+     ExportQ.ordinal   = EXE:ushortval
+     ExportQ.orgorder +=1 
      ADD(ExportQ)
    END
 
@@ -679,7 +664,8 @@ WriteLib        PROCEDURE !writes out all info in the export Q to a LIB file
 i  ULONG !USHORT !changed 7/24/02, based on note in comp.lang.clarion
    CODE
    CREATE(LIBfile)
-   OPEN(LIBfile)
+   OPEN  (LIBfile)
+
    LOOP i = 1 TO RECORDS(ExportQ)
       GET(ExportQ, i)
       IF ExportQ.treelevel=2 THEN
@@ -689,11 +675,12 @@ i  ULONG !USHORT !changed 7/24/02, based on note in comp.lang.clarion
         LIB:kind    = 0A000H
         LIB:bla     = 1
         LIB:ordflag = 1
-        LIB:len = LEN(CLIP(ExportQ.module))+LEN(CLIP(ExportQ.symbol))+2+2+SIZE(LIB:header)-3 
-                                                  ADD(LIBfile, SIZE(LIB:header))
-        LIB:pstringval = CLIP(ExportQ.symbol) ;   ADD(LIBfile, LEN(LIB:pstringval)+1)
-        LIB:pstringval = CLIP(ExportQ.module) ;   ADD(LIBfile, LEN(LIB:pstringval)+1)
-        LIB:ushortval  =      ExportQ.ordinal ;   ADD(LIBfile, SIZE(LIB:ushortval))
+        LIB:len     = LEN(CLIP(ExportQ.module)) + LEN(CLIP(ExportQ.symbol)) + 2 + 2 + SIZE(LIB:header) - 3 
+
+                                                  ADD(LIBfile, SIZE(LIB:header    )  )
+        LIB:pstringval = CLIP(ExportQ.symbol) ;   ADD(LIBfile,  LEN(LIB:pstringval)+1)
+        LIB:pstringval = CLIP(ExportQ.module) ;   ADD(LIBfile,  LEN(LIB:pstringval)+1)
+        LIB:ushortval  =      ExportQ.ordinal ;   ADD(LIBfile, SIZE(LIB:ushortval )  )
       END
    END
    CLOSE(LIBfile)
@@ -751,15 +738,16 @@ ordinal    USHORT
              lastmodule = modulename
              ExportQ.treelevel = 1
              ExportQ.icon = 1
-             ExportQ.symbol = modulename
-             ExportQ.module = modulename
-             ExportQ.ordinal = 0
-             ExportQ.orgorder +=1   !AB
+             ExportQ.symbol    = modulename
+             ExportQ.module    = modulename
+             ExportQ.ordinal   = 0
+             ExportQ.orgorder += 1
              ExportQ.ColorNFG  = glo.Colors.Defaults[1].NFG  !LONG    !Normal   Foreground color
              ExportQ.ColorNBG  = glo.Colors.Defaults[1].NBG  !LONG    !Normal   Background color
              ExportQ.ColorSFG  = glo.Colors.Defaults[1].SFG  !LONG    !Selected Foreground color
              ExportQ.ColorSBG  = glo.Colors.Defaults[1].SBG  !LONG    !Selected Background color
-             ADD(ExportQ)			 
+             ADD(ExportQ)	
+
              ExportQ.ColorNFG  = glo.Colors.Defaults[2].NFG  !LONG    !Normal   Foreground color
              ExportQ.ColorNBG  = glo.Colors.Defaults[2].NBG  !LONG    !Normal   Background color
              ExportQ.ColorSFG  = glo.Colors.Defaults[2].SFG  !LONG    !Selected Foreground color
@@ -767,10 +755,10 @@ ordinal    USHORT
           END
           ExportQ.treelevel = 2
           ExportQ.icon = 0
-          ExportQ.symbol = symbolname
-          ExportQ.module = modulename
-          ExportQ.ordinal = ordinal
-          ExportQ.orgorder +=1   !AB
+          ExportQ.symbol    = symbolname
+          ExportQ.module    = modulename
+          ExportQ.ordinal   = ordinal
+          ExportQ.orgorder +=1
           !Color was set above
           ADD(ExportQ)		  
       END
@@ -838,13 +826,13 @@ SelectQBE            PROCEDURE  !whole procedure written by AB
    !     to Remove from the search set (i.e. AND support)
    !     to Clear & Add to the search (i.e. start over)
 
-lcl     group
+lcl           group
 SearchString    STRING(40)
 SearchOption    BYTE
 ExportQ_Rec     uLong
 SearchFlag      like(ExportQ.SearchFlag)
 UnknownFlagCnt  uLong
-        end
+              end
 
 Swindow WINDOW('Define search'),AT(,,229,38),FONT('MS Sans Serif',8,,FONT:regular),SYSTEM,GRAY
        STRING('Search for'),AT(9,3),USE(?String1)
@@ -885,7 +873,7 @@ LenSS           uShort!,auto !Length of SearchStrign
 
   SetCursor(Cursor:Wait)
   lcl.UnknownFlagCnt = 0
-  glo.FoundCount     = 0 !MG Added 12/7/01
+  glo.FoundCount     = 0 
 
   if lcl.SearchOption = 1  !Contains
     loop lcl.ExportQ_Rec = 1 TO Records(ExportQ)
@@ -924,7 +912,7 @@ Update_ExportQ  ROUTINE  !of SelectQBE, called by SearchQueue
   !todo set ExportQ.Icon to match Default & Found
   !  note: will need to set prop:iconList,2 & 3 upstream
 
-  if lcl.SearchFlag = SearchFlag::Found then glo.FoundCount += 1 end !MG Added 12/7/01
+  if lcl.SearchFlag = SearchFlag::Found then glo.FoundCount += 1 end 
 
   case lcl.SearchFlag
     of ExportQ.SearchFlag
@@ -1097,6 +1085,16 @@ instringLoc   LONG,AUTO
    end
    RETURN RetMaxSymLen
    
+
+
+
+
+
+
+
+!========================================================================================
+!========================================================================================
+!========================================================================================
 !========================================================================================
 
 GenerateClasses   PROCEDURE
