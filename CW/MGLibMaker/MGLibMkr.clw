@@ -202,6 +202,10 @@ window WINDOW('MGLibMkr')                 ,AT(   ,   ,288,207),CENTER,GRAY,IMM,S
 SearchFlag::Default Equate(0)
 SearchFlag::Found   Equate(1)
 
+IconList:None       EQUATE(0) 
+IconList:Opened     EQUATE(1)
+IconList:Closed     EQUATE(2)
+IconList:Found      EQUATE(3)
    CODE
    DO PreAccept
    DO AcceptLoop
@@ -258,15 +262,15 @@ PreAccept            ROUTINE
    MGResizeClass.Perform_Resize()
    ?List1{proplist:Width,1} = ?List1{prop:Width} - qOrdColWidth
 
-   ?List1{PROP:iconlist, 1} = '~Opened.ico'
-   ?List1{PROP:iconlist, 2} = '~Closed.ico'
-   ?List1{PROP:iconlist, 3} = '~Found.ico'
+   ?List1{PROP:iconlist,IconList:Opened} = '~Opened.ico'
+   ?List1{PROP:iconlist,IconList:Closed} = '~Closed.ico'
+   ?List1{PROP:iconlist,IconList:Found } = '~Found.ico'
 
    ?Filtered{proplist:Width,1} = ?Filtered{prop:Width} - qOrdColWidth
 
-   ?Filtered{PROP:iconlist, 1} = '~Opened.ico'
-   ?Filtered{PROP:iconlist, 2} = '~Closed.ico'
-   ?Filtered{PROP:iconlist, 3} = '~Found.ico'
+   ?Filtered{PROP:iconlist,IconList:Opened} = '~Opened.ico'
+   ?Filtered{PROP:iconlist,IconList:Closed} = '~Closed.ico'
+   ?Filtered{PROP:iconlist,IconList:Found } = '~Found.ico'
 
 !   ReadFileName  = GetIni('RecentFiles','Read' ,ReadFileName ,qINI_File)
 !   WriteFileName = GetIni('RecentFiles','Write',WriteFileName,qINI_File)
@@ -394,11 +398,12 @@ OnExpandContract     ROUTINE
     i# = ?List1{PROPLIST:MouseDownRow}
     GET(ExportQ, i#)
     ExportQ.treelevel = -ExportQ.treelevel
-    IF ExportQ.icon = 1
-       ExportQ.icon = 2
+    IF ExportQ.icon = IconList:Opened
+       ExportQ.icon = IconList:Closed
     ELSE
-       ExportQ.icon = 1
+       ExportQ.icon = IconList:Opened
     END
+    ! what about IconList:Found ?
     PUT(ExportQ)
     DISPLAY(?list1)
 
@@ -517,7 +522,7 @@ j         LONG,AUTO
    ExportQ.Module    = EXE:cstringval
    ExportQ.Symbol    = EXE:cstringval
    ExportQ.treelevel = 1
-   ExportQ.icon      = 1
+   ExportQ.icon      = IconList:Opened
    ExportQ.ordinal   = 0
    ExportQ.orgorder += 1 
    !glo.Colors.Defaults[1]
@@ -530,7 +535,7 @@ j         LONG,AUTO
    ADD(ExportQ)
 
    ExportQ.treelevel = 2
-   ExportQ.icon      = 0
+   ExportQ.icon      = IconList:None
    ExportQ.ColorNFG  = glo.Colors.Defaults[2].NFG  !LONG    !Normal   Foreground color
    ExportQ.ColorNBG  = glo.Colors.Defaults[2].NBG  !LONG    !Normal   Background color
    ExportQ.ColorSFG  = glo.Colors.Defaults[2].SFG  !LONG    !Selected Foreground color
@@ -603,7 +608,7 @@ r  ULONG
    ExportQ.Module     = EXE:pstringval
    ExportQ.symbol     = EXE:pstringval
    ExportQ.ordinal    = 0
-   ExportQ.treelevel  = 1
+   ExportQ.treelevel  = IconList:Opened
    ExportQ.icon       = 1
    ExportQ.orgorder  += 1 
    ExportQ.SearchFlag = SearchFlag::Default
@@ -618,11 +623,12 @@ r  ULONG
 
 ! Now pull apart the resident name table. First entry is the module name, read above
    ExportQ.treelevel = 2
-   ExportQ.icon      = 0
+   ExportQ.icon      = IconList:None
    ExportQ.ColorNFG  = glo.Colors.Defaults[2].NFG  !LONG    !Normal   Foreground color
    ExportQ.ColorNBG  = glo.Colors.Defaults[2].NBG  !LONG    !Normal   Background color
    ExportQ.ColorSFG  = glo.Colors.Defaults[2].SFG  !LONG    !Selected Foreground color
    ExportQ.ColorSBG  = glo.Colors.Defaults[2].SBG  !LONG    !Selected Background color
+
    LOOP
      GET(EXEfile, r, SIZE(EXE:pstringval))
      IF LEN(EXE:pstringval)=0
@@ -737,7 +743,7 @@ ordinal    USHORT
           IF modulename <> lastmodule      ! A LIB can describe multiple DLLs
              lastmodule = modulename
              ExportQ.treelevel = 1
-             ExportQ.icon = 1
+             ExportQ.icon      = IconList:Opened
              ExportQ.symbol    = modulename
              ExportQ.module    = modulename
              ExportQ.ordinal   = 0
@@ -754,7 +760,7 @@ ordinal    USHORT
              ExportQ.ColorSBG  = glo.Colors.Defaults[2].SBG  !LONG    !Selected Background color
           END
           ExportQ.treelevel = 2
-          ExportQ.icon = 0
+          ExportQ.icon      = IconList:None
           ExportQ.symbol    = symbolname
           ExportQ.module    = modulename
           ExportQ.ordinal   = ordinal
@@ -925,9 +931,9 @@ Update_ExportQ  ROUTINE  !of SelectQBE, called by SearchQueue
              ExportQ.ColorSBG = glo.Colors.Defaults[ExportQ.treeLevel].SBG
              ExportQ.SearchFlag   = lcl.SearchFlag
              case ExportQ.TreeLevel
-               of  1; ExportQ.Icon = 1
-               of -1; ExportQ.Icon = 2
-             else   ; ExportQ.Icon = 0
+               of  1; ExportQ.Icon = IconList:Opened
+               of -1; ExportQ.Icon = IconList:Closed
+             else   ; ExportQ.Icon = IconList:None
              end
              Put(ExportQ)
 
@@ -937,7 +943,7 @@ Update_ExportQ  ROUTINE  !of SelectQBE, called by SearchQueue
              ExportQ.ColorSFG = glo.Colors.Found[ExportQ.treeLevel].SFG
              ExportQ.ColorSBG = glo.Colors.Found[ExportQ.treeLevel].SBG
              ExportQ.SearchFlag   = lcl.SearchFlag
-             ExportQ.Icon         = 3 !found
+             ExportQ.Icon         = IconList:Found
              Put(ExportQ)
 
   else       lcl.UnknownFlagCnt += 1
@@ -950,11 +956,12 @@ ExportPtr LONG,AUTO
   FREE(FilteredQ)
   LOOP ExportPtr = 1 TO RECORDS(ExportQ)
      GET(ExportQ, ExportPtr)
-     IF ExportQ.Icon = 3 !Found
+     IF ExportQ.Icon = IconList:Found
         FilteredQ = ExportQ
         ADD(FilteredQ)
      END  
   END
+
 
 !EndRegion - Tmp Region
 
