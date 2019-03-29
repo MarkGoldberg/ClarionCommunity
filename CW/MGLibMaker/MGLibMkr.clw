@@ -303,7 +303,7 @@ AcceptLoop           ROUTINE
        OF EVENT:AlertKey   ; DO OnAlertKey
        OF Event:Drop       ; DO OnDrop
        OF EVENT:Locate     ; DO OnLocate				
-       OF EVENT:TabChanging; ExportQ_to_FilterQ() !could be a bit more subtle, to only catch when switching TO the FilterQ			
+       OF EVENT:TabChanging; DO OnTabChanging
      END      
      
      IF MGResizeClass.Perform_Resize()
@@ -318,9 +318,18 @@ AcceptLoop           ROUTINE
 !------------------------------------------------------
 Set_DisplayCount     ROUTINE
   glo.DisplayCount = Records(ExportQ)
+  ?Tab:All{PROP:Text} = 'All ['& RECORDS(ExportQ) & ']' ! not entirely accurate, as the Module is listed in the queue.
+
   !todo: refine this value as desired,
   !  show a count of found records when a search is in effect
   !  show only level 2 records
+
+Set_FoundCount       ROUTINE 
+ ?Tab:Filtered{PROP:Text} = 'Matches to Search Only ['& RECORDS(FilteredQ) & ']'
+
+OnTabChanging        ROUTINE 
+  ExportQ_to_FilterQ() !could be a bit more subtle, to only catch when switching TO the FilterQ 
+  DO Set_FoundCount
 !------------------------------------------------------
 EnableDisable       ROUTINE
   ?List1             {PROP:Disable} = CHOOSE( RECORDS(ExportQ) = 0 )
@@ -350,6 +359,7 @@ Accepted:FindButton ROUTINE
    SelectQBE()
    ?List1   {PROP:Format} = ?List1   {PROP:Format} !<-- Added to force re-draw of Q (needed in C5EEB4 and likely elsewhere)
    ?Filtered{PROP:Format} = ?Filtered{PROP:Format} !<-- Added to force re-draw of Q (needed in C5EEB4 and likely elsewhere)
+   DO Set_FoundCount
 
 Accepted:MakeMap  ROUTINE
     IF RECORDS(ExportQ)>0
