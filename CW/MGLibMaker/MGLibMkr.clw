@@ -194,7 +194,11 @@ ListStyle:None      EQUATE(0) !IconList:None  )
 ListStyle:Opened    EQUATE(1) !IconList:Opened)
 ListStyle:Closed    EQUATE(2) !IconList:Closed)
 ListStyle:Found     EQUATE(3) !IconList:Found )
+         
+!   include('debuger.inc'),once
+!dbg         debuger
    CODE
+!   dbg.mg_init('')
    DO PreAccept
    DO AcceptLoop
    DO PostAccept
@@ -255,12 +259,37 @@ PreAccept            ROUTINE
 !   ReadFileName  = GetIni('RecentFiles','Read' ,ReadFileName ,qINI_File)
 !   WriteFileName = GetIni('RecentFiles','Write',WriteFileName,qINI_File)
 !   AsciiFileName = GetIni('RecentFiles','Ascii',AsciiFileName,qINI_File)
+   DO PreAccept:CommandLine
 
-   FileName = Command()
+
+
+PreAccept:CommandLine ROUTINE    
+
+   FileName = CLIP(LEFT(Command('READ')))
+                                          ! DBG.Debugout('(from Command()) FileName['& FileName &'] Path()['& PATH() &']')
    if len(clip(FileName))
         DO FileAdded        
    else Post(Event:Accepted,?AddFile)
    end
+
+   IF COMMAND('WRITE') AND RECORDS(ExportQ)
+      FileName = COMMAND('WRITE')
+                                          ! DBG.Debugout('Write Filename['& CLIP(FileName) &']')
+	  SetCursor(CURSOR:Wait)                            
+	 ! SORT(ExportQ  ,ExportQ.orgorder)                        
+	 ! SORT(FilteredQ,FLTQ:orgorder)                         
+	  WriteLib()
+	  SetCursor()                                       
+      IF ~COMMAND('/CLOSE') ! assume user has automated system running and doesn't want UI
+         MESSAGE('[' & CLIP(FileName) &'] written','MG Library Maker', SYSTEM{PROP:Icon})
+      END 
+   END 
+
+                                          ! DBG.Debugout('COMMAND(''/CLOSE'')['& COMMAND('/CLOSE') &']')
+   IF COMMAND('/CLOSE')
+      POST(EVENT:CloseWindow)
+   END
+ 
    DISPLAY()
 !------------------------------------------------------
 !Region Accept Loop

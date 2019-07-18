@@ -15,3 +15,6 @@ CW/Win32Lib/
 *.RSC
 *.MAP
 CW/Demos/Touch X/obj/release/touch.cwproj.FileList.xml
+CW/MGLibMaker/obj/
+*.cache
+ClaRUN.dll
