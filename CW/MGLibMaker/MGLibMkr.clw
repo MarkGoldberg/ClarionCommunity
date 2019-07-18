@@ -45,7 +45,6 @@
 !        Changed Search system of Arnor`s to use the ExportQ and Colorize and set Icon to indicate Found Lines
 !          wrote:
 !           SetThisColor     (Long argNFG, Long argNBG,*FormatColorSet argFCS)
-!           SetGloColors
 !        Added Myself to Arnor`s help about window
 !           (see Help about window documentation for additional changes)
 !        Moved much of the "technical" file definitions into FileDefs.INC
@@ -102,17 +101,15 @@
         InfoWindow
         GenerateMap        (byte argRonsFormat)
         SelectQBE  
-        SetThisColor       (Long argNFG, Long argNBG,*FormatColorSet argFCS)
-        SetGloColors       
 		  ExportQ_to_FilterQ
 		  GenerateClasses
         LongestSymbol      (),LONG   !in ExportQ Level 2
         CleanSymbol        (STRING xSymbol),STRING
         AppendAscii        (STRING xLine)
+
+        InitList           (SIGNED xFeq)
      END
 
-qINI_File      Equate('MGLibMkr.ini')
-qOrdColWidth   Equate(41) 
 
      include(   'KeyCodes.clw'),ONCE
      include(    'Equates.clw'),ONCE
@@ -121,55 +118,33 @@ qOrdColWidth   Equate(41)
 MGResizeClass ResizeClassType
 
 
-FormatColorSet    Group,Type
-NFG                 Long
-NBG                 Long
-SFG                 Long
-SBG                 Long
-                  end
 
 Glo               GROUP
-Colors               Group
-Defaults               Like(FormatColorSet),dim(2)
-Found                  Like(FormatColorSet),dim(2)
-                     end
 SortOrder            String('Original')
 DisplayCount         uLong
 FoundCount           uLong 
 RonsFormat           byte
+LevelOneCount        LONG
                   END 
 
 
 
-
-ExportQ   QUEUE,PRE(EXQ)
+ExportQ   QUEUE
 symbol      STRING(128)
-ColorNFG    LONG    !Normal   Foreground color for FName
-ColorNBG    LONG    !Normal   Background color for FName
-ColorSFG    LONG    !Selected Foreground color for FName
-ColorSBG    LONG    !Selected Background color for FName
-icon        LONG          !AB (was short)
-treelevel   SHORT
+treelevel    SHORT
+Symbol:Style BYTE
+
 ordinal     USHORT
 module      STRING(FILE:MaxFilePath)  !Modified by MJS to allow for longer file names
 
-orgorder    LONG          
+OrgOrder    LONG          
 SearchFlag  Byte          !MG (enum field, see SearchFlag::* below)
           END
 
-ASCIIfile  FILE,DRIVER('ASCII'),PRE(ASCII),CREATE,NAME(FileName)
-              RECORD
-Line            STRING(2 * SIZE(ExportQ.symbol) + 30)
-              END
-           END
           
 !Region - Tmp Region          
 FilteredQ QUEUE(ExportQ),PRE(FLTQ)
           END
-
-
-
-LOC:FoundRec  LONG        
 
 
 window WINDOW('MGLibMkr')                 ,AT(   ,   ,288,207),CENTER,GRAY,IMM,SYSTEM,ICON('LIBRARY.ICO'), FONT('Segoe UI'),ALRT(DeleteKey),DROPID('~FILE'),RESIZE
@@ -191,21 +166,34 @@ window WINDOW('MGLibMkr')                 ,AT(   ,   ,288,207),CENTER,GRAY,IMM,S
       END
       SHEET                               ,AT(  4,  4,283,160),USE(?SHEET),SPREAD
          TAB('All')                                           ,USE(?Tab:All)
-            LIST                          ,AT(  8, 20,272,138),USE(?List1)                       ,DISABLE,COLUMN,VCR,VSCROLL,FROM(ExportQ)  ,FORMAT('143L(2)|M*T~Module and Procedures~30R(3)~Ordinal~@N_5B@')
+            LIST                          ,AT(  8, 20,272,138),USE(?List1)                       ,DISABLE,COLUMN,VCR,VSCROLL,FROM(ExportQ)  ,FORMAT('143L(2)|MYT~Module and Procedures~30R(3)~Ordinal~@N_5B@')
          END
-         TAB('Matches to Search Only--- [0]')                    ,USE(?Tab:Filtered)                ,FONT(,,COLOR:Blue)
-            LIST                          ,AT(  8, 24,272,138),USE(?Filtered)                    ,DISABLE,COLUMN,VCR,VSCROLL,FROM(FilteredQ),FORMAT('143L(2)|M*T~Module and Procedures~30R(3)~Ordinal~@N_5B@')
+         TAB('Matches to Search Only--- [0]')                 ,USE(?Tab:Filtered)                ,FONT(,,COLOR:Blue)
+            LIST                          ,AT(  8, 24,272,138),USE(?Filtered)                    ,DISABLE,COLUMN,VCR,VSCROLL,FROM(FilteredQ),FORMAT('143L(2)|MYT~Module and Procedures~30R(3)~Ordinal~@N_5B@')
          END
       END
    END
 
+ASCIIfile  FILE,DRIVER('ASCII'),PRE(ASCII),CREATE,NAME(FileName)
+              RECORD
+Line            STRING(2 * SIZE(ExportQ.symbol) + 30)
+              END
+           END
+qINI_File           Equate('MGLibMkr.ini')
+qOrdColWidth        Equate(45) 
+
 SearchFlag::Default Equate(0)
 SearchFlag::Found   Equate(1)
 
-IconList:None       EQUATE(0) 
-IconList:Opened     EQUATE(1)
-IconList:Closed     EQUATE(2)
-IconList:Found      EQUATE(3)
+!IconList:None       EQUATE(0) 
+!IconList:Opened     EQUATE(1)
+!IconList:Closed     EQUATE(2)
+!IconList:Found      EQUATE(3)
+
+ListStyle:None      EQUATE(0) !IconList:None  )
+ListStyle:Opened    EQUATE(1) !IconList:Opened)
+ListStyle:Closed    EQUATE(2) !IconList:Closed)
+ListStyle:Found     EQUATE(3) !IconList:Found )
    CODE
    DO PreAccept
    DO AcceptLoop
@@ -224,7 +212,6 @@ PostAccept           ROUTINE
    PutIni('Settings','RonsFormat',glo.RonsFormat,qINI_FILE)
 !------------------------------------------------------
 PreAccept            ROUTINE
-   SetGloColors()
    OPEN(window)
    System{prop:Icon} = window{prop:icon} !Have any non-minimize-able additional windows share the same Icon
    ExportQ.orgorder = 0   
@@ -260,17 +247,10 @@ PreAccept            ROUTINE
 
    !?List1{proplist:Width,1} = GetIni('Position','Col1W',?List1{proplist:Width,1},qINI_FILE)
    MGResizeClass.Perform_Resize()
-   ?List1{proplist:Width,1} = ?List1{prop:Width} - qOrdColWidth
 
-   ?List1{PROP:iconlist,IconList:Opened} = '~Opened.ico'
-   ?List1{PROP:iconlist,IconList:Closed} = '~Closed.ico'
-   ?List1{PROP:iconlist,IconList:Found } = '~Found.ico'
+   InitList(?List1)
+   InitList(?Filtered)
 
-   ?Filtered{proplist:Width,1} = ?Filtered{prop:Width} - qOrdColWidth
-
-   ?Filtered{PROP:iconlist,IconList:Opened} = '~Opened.ico'
-   ?Filtered{PROP:iconlist,IconList:Closed} = '~Closed.ico'
-   ?Filtered{PROP:iconlist,IconList:Found } = '~Found.ico'
 
 !   ReadFileName  = GetIni('RecentFiles','Read' ,ReadFileName ,qINI_File)
 !   WriteFileName = GetIni('RecentFiles','Write',WriteFileName,qINI_File)
@@ -318,14 +298,14 @@ AcceptLoop           ROUTINE
 !------------------------------------------------------
 Set_DisplayCount     ROUTINE
   glo.DisplayCount = Records(ExportQ)
-  ?Tab:All{PROP:Text} = 'All ['& RECORDS(ExportQ) & ']' ! not entirely accurate, as the Module is listed in the queue.
+  ?Tab:All{PROP:Text} = 'All ['& RECORDS(ExportQ) - glo.LevelOneCount & ']' ! not entirely accurate, as the Module is listed in the queue.
 
   !todo: refine this value as desired,
   !  show a count of found records when a search is in effect
   !  show only level 2 records
 
 Set_FoundCount       ROUTINE 
- ?Tab:Filtered{PROP:Text} = 'Matches to Search Only ['& RECORDS(FilteredQ) & ']'
+ ?Tab:Filtered{PROP:Text} = 'Matches to Search Only ['& glo.FoundCount & ']'
 
 OnTabChanging        ROUTINE 
   ExportQ_to_FilterQ() !could be a bit more subtle, to only catch when switching TO the FilterQ 
@@ -376,6 +356,10 @@ Accepted:MakeMap  ROUTINE
 
 Accepted:Clear ROUTINE       
    FREE(ExportQ); FREE(FilteredQ)   
+   glo:LevelOneCount = 0
+   glo:FoundCount    = 0
+   DO Set_FoundCount
+   DO Set_DisplayCount
    Window{PROP:Text} = 'LibMaker'
    DISPLAY
 
@@ -408,12 +392,12 @@ OnExpandContract     ROUTINE
     i# = ?List1{PROPLIST:MouseDownRow}
     GET(ExportQ, i#)
     ExportQ.treelevel = -ExportQ.treelevel
-    IF ExportQ.icon = IconList:Opened
-       ExportQ.icon = IconList:Closed
+    IF ExportQ.Symbol:Style = ListStyle:Opened
+       ExportQ.Symbol:Style = ListStyle:Closed
     ELSE
-       ExportQ.icon = IconList:Opened
+       ExportQ.Symbol:Style = ListStyle:Opened
     END
-    ! what about IconList:Found ?
+    ! what about ListStyle:Found ?
     PUT(ExportQ)
     DISPLAY(?list1)
 
@@ -458,6 +442,7 @@ FileAdded            ROUTINE
     ReadLib()
   ELSE
     ReadExecutable()
+    glo:LevelOneCount += 1 
   END
   Window{PROP:Text} = 'LibMaker - ' & CLIP(FileName)  !AB  !MG Note: This will only show that LAST file added, when multiple are added
   !PutIni('RecentFiles','Read',FileName,qINI_File)
@@ -544,24 +529,17 @@ j         LONG,AUTO
    ExportQ.Module    = EXE:cstringval
    ExportQ.Symbol    = EXE:cstringval
    ExportQ.treelevel = 1
-   ExportQ.icon      = IconList:Opened
+   ExportQ.Symbol:Style      = ListStyle:Opened
    ExportQ.ordinal   = 0
    ExportQ.orgorder += 1 
    !glo.Colors.Defaults[1]
 
-   ExportQ.SearchFlag= SearchFlag::Default
-   ExportQ.ColorNFG  = glo.Colors.Defaults[1].NFG  !LONG    !Normal   Foreground color
-   ExportQ.ColorNBG  = glo.Colors.Defaults[1].NBG  !LONG    !Normal   Background color
-   ExportQ.ColorSFG  = glo.Colors.Defaults[1].SFG  !LONG    !Selected Foreground color
-   ExportQ.ColorSBG  = glo.Colors.Defaults[1].SBG  !LONG    !Selected Background color
+   ExportQ.SearchFlag= SearchFlag::Default   
+
    ADD(ExportQ)
 
    ExportQ.treelevel = 2
-   ExportQ.icon      = IconList:None
-   ExportQ.ColorNFG  = glo.Colors.Defaults[2].NFG  !LONG    !Normal   Foreground color
-   ExportQ.ColorNBG  = glo.Colors.Defaults[2].NBG  !LONG    !Normal   Background color
-   ExportQ.ColorSFG  = glo.Colors.Defaults[2].SFG  !LONG    !Selected Foreground color
-   ExportQ.ColorSBG  = glo.Colors.Defaults[2].SBG  !LONG    !Selected Background color
+   ExportQ.Symbol:Style      = ListStyle:None
 
    LOOP j = 0 TO NumNames - 1
       GET(EXEfile, Names    + j*4 - ImageBase+1, SIZE(EXE:ulongval))
@@ -578,47 +556,6 @@ j         LONG,AUTO
 
 
 !========================================================================================
-SetGloColors         PROCEDURE  
-!  -----------------------------------------------
-!  Create : 10/18/98 by Monolith Custom Computing, Inc
-!  Purpose: To set the color schemes for conditional coloring
-!
-!  Note: N  -- Normal
-!        S  -- Selected
-!        FB -- ForeGround
-!        BG -- BackGround
-!  -----------------------------------------------
-CurrentColor    Like(FormatColorSet)
-  CODE
-  SetThisColor(Color:None    ,Color:None    ,CurrentColor) ; glo.Colors.Defaults[1] = CurrentColor
-  SetThisColor(Color:None    ,Color:None    ,CurrentColor) ; glo.Colors.Defaults[2] = CurrentColor
-  SetThisColor(Color:Green   ,Color:None    ,CurrentColor) ; glo.Colors.Found[1]    = CurrentColor
-  SetThisColor(Color:Blue    ,Color:None    ,CurrentColor) ; glo.Colors.Found[2]    = CurrentColor
-
-  !SetThisColor(Color:Blue    ,Color:None    ,glo.Colors.Found[2])  !doesn't complie (no matching prototype)
-
-!========================================================================================
-SetThisColor         PROCEDURE(Long argNFG, Long argNBG, *FormatColorSet argFCS)
-  code
-  argFCS.NFG = argNFG
-  argFCS.NBG = argNBG
-  argFCS.SFG = argNBG !Reverse of Normal
-  argFCS.SBG = argNFG !Reverse of Normal
-
-
-!!========================================================================================
-!AddExportQ    Procedure
-!  -----------------------------------------------
-!  Create : 10/18/98 by Monolith Custom Computing, Inc
-!  Purpose: To add the current ExportQ Buffer to the ExportQ
-!           While setting some Additional fields for 'behind the scenes' work
-!  -----------------------------------------------
-!  code
-!  ExportQ.orgorder +=1   !AB
-!  ADD(ExportQ)
-
-
-!========================================================================================
 DumpNEExports   PROCEDURE ! DumpNEexports gets export table from a NE format file (16-bit)
 j  ULONG
 r  ULONG
@@ -630,14 +567,10 @@ r  ULONG
    ExportQ.Module     = EXE:pstringval
    ExportQ.symbol     = EXE:pstringval
    ExportQ.ordinal    = 0
-   ExportQ.treelevel  = IconList:Opened
-   ExportQ.icon       = 1
+   ExportQ.treelevel  = ListStyle:Opened
+   ExportQ.Symbol:Style = 1
    ExportQ.orgorder  += 1 
    ExportQ.SearchFlag = SearchFlag::Default
-   ExportQ.ColorNFG   = glo.Colors.Defaults[1].NFG  !LONG    !Normal   Foreground color
-   ExportQ.ColorNBG   = glo.Colors.Defaults[1].NBG  !LONG    !Normal   Background color
-   ExportQ.ColorSFG   = glo.Colors.Defaults[1].SFG  !LONG    !Selected Foreground color
-   ExportQ.ColorSBG   = glo.Colors.Defaults[1].SBG  !LONG    !Selected Background color
 
    ADD(ExportQ)
    r += LEN(EXE:pstringval)+1    !move past module name
@@ -645,11 +578,7 @@ r  ULONG
 
 ! Now pull apart the resident name table. First entry is the module name, read above
    ExportQ.treelevel = 2
-   ExportQ.icon      = IconList:None
-   ExportQ.ColorNFG  = glo.Colors.Defaults[2].NFG  !LONG    !Normal   Foreground color
-   ExportQ.ColorNBG  = glo.Colors.Defaults[2].NBG  !LONG    !Normal   Background color
-   ExportQ.ColorSFG  = glo.Colors.Defaults[2].SFG  !LONG    !Selected Foreground color
-   ExportQ.ColorSBG  = glo.Colors.Defaults[2].SBG  !LONG    !Selected Background color
+   ExportQ.Symbol:Style      = ListStyle:None
 
    LOOP
      GET(EXEfile, r, SIZE(EXE:pstringval))
@@ -765,24 +694,17 @@ ordinal    USHORT
           IF modulename <> lastmodule      ! A LIB can describe multiple DLLs
              lastmodule = modulename
              ExportQ.treelevel = 1
-             ExportQ.icon      = IconList:Opened
+             ExportQ.Symbol:Style      = ListStyle:Opened
              ExportQ.symbol    = modulename
              ExportQ.module    = modulename
              ExportQ.ordinal   = 0
              ExportQ.orgorder += 1
-             ExportQ.ColorNFG  = glo.Colors.Defaults[1].NFG  !LONG    !Normal   Foreground color
-             ExportQ.ColorNBG  = glo.Colors.Defaults[1].NBG  !LONG    !Normal   Background color
-             ExportQ.ColorSFG  = glo.Colors.Defaults[1].SFG  !LONG    !Selected Foreground color
-             ExportQ.ColorSBG  = glo.Colors.Defaults[1].SBG  !LONG    !Selected Background color
-             ADD(ExportQ)	
+             ADD(ExportQ)
+             glo:LevelOneCount += 1	
 
-             ExportQ.ColorNFG  = glo.Colors.Defaults[2].NFG  !LONG    !Normal   Foreground color
-             ExportQ.ColorNBG  = glo.Colors.Defaults[2].NBG  !LONG    !Normal   Background color
-             ExportQ.ColorSFG  = glo.Colors.Defaults[2].SFG  !LONG    !Selected Foreground color
-             ExportQ.ColorSBG  = glo.Colors.Defaults[2].SBG  !LONG    !Selected Background color
           END
           ExportQ.treelevel = 2
-          ExportQ.icon      = IconList:None
+          ExportQ.Symbol:Style      = ListStyle:None
           ExportQ.symbol    = symbolname
           ExportQ.module    = modulename
           ExportQ.ordinal   = ordinal
@@ -937,7 +859,7 @@ LenSS           uShort!,auto !Length of SearchStrign
 	
 !-------------------------------------------------------------
 Update_ExportQ  ROUTINE  !of SelectQBE, called by SearchQueue
-  !todo set ExportQ.Icon to match Default & Found
+  !todo set ExportQ.Symbol:Style to match Default & Found
   !  note: will need to set prop:iconList,2 & 3 upstream
 
   if lcl.SearchFlag = SearchFlag::Found then glo.FoundCount += 1 end 
@@ -947,25 +869,25 @@ Update_ExportQ  ROUTINE  !of SelectQBE, called by SearchQueue
              !do nothing we're already set
 
     of SearchFlag::Default
-             ExportQ.ColorNFG = glo.Colors.Defaults[ExportQ.treeLevel].NFG
-             ExportQ.ColorNBG = glo.Colors.Defaults[ExportQ.treeLevel].NBG
-             ExportQ.ColorSFG = glo.Colors.Defaults[ExportQ.treeLevel].SFG
-             ExportQ.ColorSBG = glo.Colors.Defaults[ExportQ.treeLevel].SBG
+             !ExportQ.ColorNFG = glo.Colors.Defaults[ExportQ.treeLevel].NFG
+             !ExportQ.ColorNBG = glo.Colors.Defaults[ExportQ.treeLevel].NBG
+             !ExportQ.ColorSFG = glo.Colors.Defaults[ExportQ.treeLevel].SFG
+             !ExportQ.ColorSBG = glo.Colors.Defaults[ExportQ.treeLevel].SBG
              ExportQ.SearchFlag   = lcl.SearchFlag
              case ExportQ.TreeLevel
-               of  1; ExportQ.Icon = IconList:Opened
-               of -1; ExportQ.Icon = IconList:Closed
-             else   ; ExportQ.Icon = IconList:None
+               of  1; ExportQ.Symbol:Style = ListStyle:Opened
+               of -1; ExportQ.Symbol:Style = ListStyle:Closed
+             else   ; ExportQ.Symbol:Style = ListStyle:None
              end
              Put(ExportQ)
 
     of SearchFlag::Found
-             ExportQ.ColorNFG = glo.Colors.Found[ExportQ.treeLevel].NFG
-             ExportQ.ColorNBG = glo.Colors.Found[ExportQ.treeLevel].NBG
-             ExportQ.ColorSFG = glo.Colors.Found[ExportQ.treeLevel].SFG
-             ExportQ.ColorSBG = glo.Colors.Found[ExportQ.treeLevel].SBG
+             !ExportQ.ColorNFG = glo.Colors.Found[ExportQ.treeLevel].NFG
+             !ExportQ.ColorNBG = glo.Colors.Found[ExportQ.treeLevel].NBG
+             !ExportQ.ColorSFG = glo.Colors.Found[ExportQ.treeLevel].SFG
+             !ExportQ.ColorSBG = glo.Colors.Found[ExportQ.treeLevel].SBG
              ExportQ.SearchFlag   = lcl.SearchFlag
-             ExportQ.Icon         = IconList:Found
+             ExportQ.Symbol:Style         = ListStyle:Found
              Put(ExportQ)
 
   else       lcl.UnknownFlagCnt += 1
@@ -976,11 +898,16 @@ ExportQ_to_FilterQ   PROCEDURE()
 ExportPtr LONG,AUTO
   CODE
   FREE(FilteredQ)
+  glo.FoundCount = 0
   LOOP ExportPtr = 1 TO RECORDS(ExportQ)
      GET(ExportQ, ExportPtr)
-     IF ExportQ.Icon = IconList:Found
-        FilteredQ = ExportQ
-        ADD(FilteredQ)
+     CASE ExportQ.Symbol:Style 
+     ! OF ListStyle:None  ; ! do nothing
+   
+       OF ListStyle:Found ; glo.FoundCount += 1 ! Want Found, as well as Opened and Closed
+     OROF ListStyle:Opened
+     OROF ListStyle:Closed; FilteredQ = ExportQ
+                            ADD(FilteredQ)
      END  
   END
 
@@ -1298,3 +1225,26 @@ AppendAscii    PROCEDURE(STRING xLine)
    
 
    
+InitList   PROCEDURE(SIGNED xFEQ)
+   CODE    
+   xFEQ{PROP:LineHeight}                        = 9
+   xFEQ{proplist:Width,1}                       = xFEQ{prop:Width} - qOrdColWidth
+
+   xFEQ{PROPStyle:TextColor   , ListStyle:None   }  = COLOR:Black
+
+   xFEQ{PROPStyle:TextColor   , ListStyle:Opened } = COLOR:Green
+   xFEQ{PROPStyle:TextSelected, ListStyle:Opened } = COLOR:White
+   xFEQ{PROPStyle:BackSelected, ListStyle:Opened } = xFEQ{PROPStyle:TextColor   , ListStyle:Opened }
+   xFEQ{PROPSTYLE:FontSize    , ListStyle:Opened } = 10
+   xFEQ{PROPSTYLE:FontStyle   , ListStyle:Opened } = FONT:Bold
+
+   xFEQ{PROPStyle:TextColor   , ListStyle:Closed } = COLOR:Olive
+   xFEQ{PROPStyle:TextSelected, ListStyle:Closed } = COLOR:White
+   xFEQ{PROPStyle:BackSelected, ListStyle:Closed } = xFEQ{PROPStyle:TextColor   , ListStyle:Closed }
+   xFEQ{PROPSTYLE:FontSize    , ListStyle:Closed } = 10
+   xFEQ{PROPSTYLE:FontStyle   , ListStyle:Closed } = FONT:Bold
+
+   xFEQ{PROPStyle:TextColor   , ListStyle:Found }  = COLOR:Blue
+
+
+
