@@ -1,10 +1,5 @@
  PROGRAM
 
-!Updated 2014-Jan-14 By Mark Goldberg 
-!  - Added Ability to Generate Classes (no parameters )
-!  - Refactored some of the code.
-!  - A Lot of code is still badly written
-!                                  
 
 !Region Ancient Documentation
 ! =========================================================================================
@@ -89,58 +84,57 @@
 ! TODO (notes: June 20 2005)
 !   replace color work with STYLES
 !   remove lcl/rou GROUPS, use LCL: and ROU:
+
+!Updated 2014-Jan-14 By Mark Goldberg 
+!  - Added Ability to Generate Classes (no parameters )
+!  - Refactored some of the code.
+!  - A Lot of code is still badly written
+!                                  
+
 ! =========================================================================================
 !EndRegion Ancient Documentation
 
      MAP
-        ReadExecutable
-        DumpPEExportTable  (ULONG RawAddr, ULONG VirtAddr)
-        DumpNEExports
-        WriteLib
-        ReadLib
-        InfoWindow
-        GenerateMap        (byte argRonsFormat)
-        SelectQBE  
-		  ExportQ_to_FilterQ
-		  GenerateClasses
-        LongestSymbol      (),LONG   !in ExportQ Level 2
-        CleanSymbol        (STRING xSymbol),STRING
-        AppendAscii        (STRING xLine)
+        ReadExecutable       ()
+        DumpPEExportTable    (ULONG RawAddr, ULONG VirtAddr)
+        DumpNEExports        ()
+        WriteLib             () 
+        ReadLib              ()
+        InfoWindow           () 
+        GenerateMap          (BYTE argRonsFormat)
+        SelectQBE            ()
+        ExportQ_to_FilterQ   ()
+        GenerateClasses      ()
+        LongestSymbol        (),LONG   !in ExportQ Level 2
+        CleanSymbol          (STRING xSymbol),STRING
+        AppendAscii          (STRING xLine)
 
-        InitList           (SIGNED xFeq)
+        InitList             (SIGNED xFeq)
      END
 
-
-     include(   'KeyCodes.clw'),ONCE
-     include(    'Equates.clw'),ONCE
-     include(   'FileDefs.inc'),ONCE
-     include('ResizeClass.inc'),ONCE
+     INCLUDE(   'KeyCodes.clw'),ONCE
+     INCLUDE(    'Equates.clw'),ONCE
+     INCLUDE(   'FileDefs.inc'),ONCE
+     INCLUDE('ResizeClass.inc'),ONCE
 MGResizeClass ResizeClassType
 
+Glo             GROUP
+SortOrder          STRING('Original')
+DisplayCount       ULONG
+FoundCount         ULONG 
+RonsFormat         BYTE
+LevelOneCount      LONG
+                END 
 
-
-Glo               GROUP
-SortOrder            String('Original')
-DisplayCount         uLong
-FoundCount           uLong 
-RonsFormat           byte
-LevelOneCount        LONG
-                  END 
-
-
-
-ExportQ   QUEUE
-symbol      STRING(128)
-treelevel    SHORT
-Symbol:Style BYTE
-
-ordinal     USHORT
-module      STRING(FILE:MaxFilePath)  !Modified by MJS to allow for longer file names
-
-OrgOrder    LONG          
-SearchFlag  Byte          !MG (enum field, see SearchFlag::* below)
-          END
-
+ExportQ         QUEUE
+symbol             STRING(128)
+treelevel          SHORT
+Symbol:Style       BYTE
+ordinal            USHORT
+module             STRING(FILE:MaxFilePath)  !Modified by MJS to allow for longer file names
+OrgOrder           LONG          
+SearchFlag         Byte          !MG (enum field, see SearchFlag::* below)
+                END
           
 !Region - Tmp Region          
 FilteredQ QUEUE(ExportQ),PRE(FLTQ)
@@ -179,21 +173,16 @@ ASCIIfile  FILE,DRIVER('ASCII'),PRE(ASCII),CREATE,NAME(FileName)
 Line            STRING(2 * SIZE(ExportQ.symbol) + 30)
               END
            END
-qINI_File           Equate('MGLibMkr.ini')
-qOrdColWidth        Equate(45) 
+qINI_File           EQUATE('MGLibMkr.ini')
+qOrdColWidth        EQUATE(45) 
 
-SearchFlag::Default Equate(0)
-SearchFlag::Found   Equate(1)
+SearchFlag::Default EQUATE(0)
+SearchFlag::Found   EQUATE(1)
 
-!IconList:None       EQUATE(0) 
-!IconList:Opened     EQUATE(1)
-!IconList:Closed     EQUATE(2)
-!IconList:Found      EQUATE(3)
-
-ListStyle:None      EQUATE(0) !IconList:None  )
-ListStyle:Opened    EQUATE(1) !IconList:Opened)
-ListStyle:Closed    EQUATE(2) !IconList:Closed)
-ListStyle:Found     EQUATE(3) !IconList:Found )
+ListStyle:None      EQUATE(0) 
+ListStyle:Opened    EQUATE(1) 
+ListStyle:Closed    EQUATE(2) 
+ListStyle:Found     EQUATE(3) 
          
 !   include('debuger.inc'),once
 !dbg         debuger
@@ -206,18 +195,18 @@ ListStyle:Found     EQUATE(3) !IconList:Found )
 !------------------------------------------------------
 PostAccept           ROUTINE
    MGResizeClass.Close_Class()
-   if ~0{prop:Iconize}
-      PutIni('Position','X',0{prop:XPOS } ,qINI_FILE)
-      PutIni('Position','Y',0{prop:YPOS } ,qINI_FILE)
-      PutIni('Position','W',0{prop:Width} ,qINI_FILE)
-      PutIni('Position','H',0{prop:Height},qINI_FILE)
-   !  PutIni('Position','Col1W',?List1{proplist:Width,1},qINI_FILE)
-   end
-   PutIni('Settings','RonsFormat',glo.RonsFormat,qINI_FILE)
+   IF ~0{prop:Iconize}
+      PUTINI('Position','X',0{prop:XPOS } ,qINI_FILE)
+      PUTINI('Position','Y',0{prop:YPOS } ,qINI_FILE)
+      PUTINI('Position','W',0{prop:Width} ,qINI_FILE)
+      PUTINI('Position','H',0{prop:Height},qINI_FILE)
+   !  PUTINI('Position','Col1W',?List1{proplist:Width,1},qINI_FILE)
+   END
+   PUTINI('Settings','RonsFormat',glo.RonsFormat,qINI_FILE)
 !------------------------------------------------------
 PreAccept            ROUTINE
    OPEN(window)
-   System{prop:Icon} = window{prop:icon} !Have any non-minimize-able additional windows share the same Icon
+   SYSTEM{prop:Icon} = window{prop:icon} !Have any non-minimize-able additional windows share the same Icon
    ExportQ.orgorder = 0   
 
    ! ?list1{prop:vcr}=TRUE   !Suppress the ? button in the vcr
@@ -241,36 +230,32 @@ PreAccept            ROUTINE
 
   !MGResizeClass.Add_ResizeQ(?SearchList,'L/T R/B') !Problem!
 
-   0{prop:XPOS}   = GetIni('Position','X',0{prop:XPOS } ,qINI_FILE)
-   0{prop:YPOS}   = GetIni('Position','Y',0{prop:YPOS } ,qINI_FILE)
-   0{prop:Width}  = GetIni('Position','W',0{prop:Width} ,qINI_FILE)
-   0{prop:Height} = GetIni('Position','H',0{prop:Height},qINI_FILE)
-   glo.RonsFormat = GetIni('Settings','RonsFormat',FALSE,qINI_FILE)
+   0{prop:XPOS}   = GETINI('Position','X',0{prop:XPOS } ,qINI_FILE)
+   0{prop:YPOS}   = GETINI('Position','Y',0{prop:YPOS } ,qINI_FILE)
+   0{prop:Width}  = GETINI('Position','W',0{prop:Width} ,qINI_FILE)
+   0{prop:Height} = GETINI('Position','H',0{prop:Height},qINI_FILE)
+   glo.RonsFormat = GETINI('Settings','RonsFormat',FALSE,qINI_FILE)
 
    ?List1{PROP:LineHeight}  = 8               !AB
 
-   !?List1{proplist:Width,1} = GetIni('Position','Col1W',?List1{proplist:Width,1},qINI_FILE)
+   !?List1{proplist:Width,1} = GETINI('Position','Col1W',?List1{proplist:Width,1},qINI_FILE)
    MGResizeClass.Perform_Resize()
 
    InitList(?List1)
    InitList(?Filtered)
 
-
-!   ReadFileName  = GetIni('RecentFiles','Read' ,ReadFileName ,qINI_File)
-!   WriteFileName = GetIni('RecentFiles','Write',WriteFileName,qINI_File)
-!   AsciiFileName = GetIni('RecentFiles','Ascii',AsciiFileName,qINI_File)
    DO PreAccept:CommandLine
 
 
 
 PreAccept:CommandLine ROUTINE    
 
-   FileName = CLIP(LEFT(Command('READ')))
+   FileName = CLIP(LEFT(COMMAND('READ')))
                                           ! DBG.Debugout('(from Command()) FileName['& FileName &'] Path()['& PATH() &']')
-   if len(clip(FileName))
+   IF len(CLIP(FileName))
         DO FileAdded        
-   else Post(Event:Accepted,?AddFile)
-   end
+   ELSE POST(Event:Accepted,?AddFile)
+   END
 
    IF COMMAND('WRITE') AND RECORDS(ExportQ)
       FileName = COMMAND('WRITE')
@@ -279,7 +264,7 @@ PreAccept:CommandLine ROUTINE
 	 ! SORT(ExportQ  ,ExportQ.orgorder)                        
 	 ! SORT(FilteredQ,FLTQ:orgorder)                         
 	  WriteLib()
-	  SetCursor()                                       
+	  SETCURSOR()                                       
       IF ~COMMAND('/CLOSE') ! assume user has automated system running and doesn't want UI
          MESSAGE('[' & CLIP(FileName) &'] written','MG Library Maker', SYSTEM{PROP:Icon})
       END 
@@ -317,7 +302,7 @@ AcceptLoop           ROUTINE
      
      IF MGResizeClass.Perform_Resize()
         ?List1   {proplist:Width,1} = ?List1   {prop:Width} - qOrdColWidth
-		  ?Filtered{proplist:Width,1} = ?Filtered{prop:Width} - qOrdColWidth
+	    ?Filtered{proplist:Width,1} = ?Filtered{prop:Width} - qOrdColWidth
      END
      
      DO EnableDisable
@@ -326,12 +311,8 @@ AcceptLoop           ROUTINE
 
 !------------------------------------------------------
 Set_DisplayCount     ROUTINE
-  glo.DisplayCount = Records(ExportQ)
+  glo.DisplayCount = RECORDS(ExportQ)
   ?Tab:All{PROP:Text} = 'All ['& RECORDS(ExportQ) - glo.LevelOneCount & ']' ! not entirely accurate, as the Module is listed in the queue.
-
-  !todo: refine this value as desired,
-  !  show a count of found records when a search is in effect
-  !  show only level 2 records
 
 Set_FoundCount       ROUTINE 
  ?Tab:Filtered{PROP:Text} = 'Matches to Search Only ['& glo.FoundCount & ']'
@@ -354,15 +335,15 @@ EnableDisable       ROUTINE
 
 !Region Accepted ROUTINEs
 Accepted:SortOrder ROUTINE       
-   SetCursor(CURSOR:Wait)
-   Execute Choice(?glo:SortOrder)
+   SETCURSOR(CURSOR:Wait)
+   EXECUTE CHOICE(?glo:SortOrder)
       BEGIN; SORT(ExportQ,ExportQ.orgorder)                                 ; SORT(FilteredQ,FLTQ:orgorder)                           ; END
       BEGIN; SORT(ExportQ,ExportQ.Module,ExportQ.TreeLevel,ExportQ.symbol)  ; SORT(FilteredQ,FLTQ:Module,FLTQ:TreeLevel,FLTQ:symbol)  ; END
       BEGIN; SORT(ExportQ,ExportQ.Module,ExportQ.TreeLevel,ExportQ.Ordinal) ; SORT(FilteredQ,FLTQ:Module,FLTQ:TreeLevel,FLTQ:Ordinal) ; END
    END
    ?List1   {PROP:Format} = ?List1   {PROP:Format} !<-- Added to force re-draw of Q (needed in C5EEB4 and likely elsewhere)
    ?Filtered{PROP:Format} = ?Filtered{PROP:Format} !<-- Added to force re-draw of Q (needed in C5EEB4 and likely elsewhere)
-   SetCursor()
+   SETCURSOR()
    
 Accepted:FindButton ROUTINE
    SelectQBE()
@@ -372,13 +353,13 @@ Accepted:FindButton ROUTINE
 
 Accepted:MakeMap  ROUTINE
     IF RECORDS(ExportQ)>0
-     Clear(FileName) !FileName = AsciiFileName
-     IF FileDialog('Save Clarion Map definition as ...', FileName, |
+     CLEAR(FileName) !FileName = AsciiFileName
+     IF FILEDIALOG('Save Clarion Map definition as ...', FileName, |
         'CW Source and Includes (*.clw,*.inc)|*.clw;*.inc|Source Only|*.clw|Includes Only|*.inc|All|*.*',FILE:Save+FILE:LongName)
         GenerateMap(glo.RonsFormat)
         !AsciiFileName = FileName
-        if Message('Would you like to view the map with Notepad?','Note',ICON:Question,Button:Yes+Button:No,Button:Yes)=Button:Yes
-           Run('notepad ' & FileName)
+        if MESSAGE('Would you like to view the map with Notepad?','Note',ICON:Question,Button:Yes+Button:No,Button:Yes)=Button:Yes
+           RUN('notepad ' & FileName)
         END
      END
    END
@@ -390,26 +371,26 @@ Accepted:Clear ROUTINE
    DO Set_FoundCount
    DO Set_DisplayCount
    Window{PROP:Text} = 'LibMaker'
-   DISPLAY
+   DISPLAY()
 
 Accepted:AddFile  ROUTINE
-   IF FileDialog('Import symbols from file ...', FileName, |
+   IF FILEDIALOG('Import symbols from file ...', FileName, |
                  'DLLs and LIBs|*.dll;*.lib|DLL files (*.dll)|*.dll|LIB files (*.lib)|*.lib|Executables (*.exe)|All files (*.*)|*.*', |
                  FILE:LongName)
-     DISPLAY
-     do FileAdded
+     DISPLAY()
+     DO FileAdded
    END   
 
 Accepted:SaveAs   ROUTINE       
    IF RECORDS(ExportQ)>0
-     Clear(FileName) !FileName = WriteFileName
-     IF FileDialog('Save OMF library definition as ...', FileName, 'Library files (*.lib)|*.lib',FILE:Save+FILE:LongName)
+     CLEAR(FileName) !FileName = WriteFileName
+     IF FILEDIALOG('Save OMF library definition as ...', FileName, 'Library files (*.lib)|*.lib',FILE:Save+FILE:LongName)
         Window{PROP:Text} = 'LibMaker - ' & CLIP(FileName)
-        SetCursor(CURSOR:Wait)                            
+        SETCURSOR(CURSOR:Wait)                            
         SORT(ExportQ  ,ExportQ.orgorder)                        
         SORT(FilteredQ,FLTQ:orgorder)                         
-        WriteLib
-        SetCursor()                                       
+        WriteLib()
+        SETCURSOR()                                       
         !WriteFileName = FileName
      END
    END
@@ -432,9 +413,10 @@ OnExpandContract     ROUTINE
 
 OnAlertKey           ROUTINE       
    !TODO: Bug FilterdQ
-    IF KeyCode()=DeleteKey
+    IF KEYCODE()=DeleteKey
        GET(ExportQ, CHOICE(?List1))
        DELETE(ExportQ)
+
        IF (ExportQ.treelevel<2)
          GET(ExportQ, CHOICE(?List1))
          LOOP WHILE (ExportQ.treelevel=2)
@@ -453,29 +435,29 @@ OnDrop               ROUTINE
   !Message('We got a drop event!|Drop() [' & DropID() & ']','debug')
   !TODO: Support for MULTIPLE Files at once
   !TODO: Set the TITLE as is done with FileAdd
-  FileName = DropID()
-  do FileAdded
+  FileName = DROPID()
+  DO FileAdded
   
 
 OnLocate             ROUTINE       
   BEEP()  !debugging beep (never happens--bug!)
   !note, ,VCR(?FindButton) doesn't work for me either
-  Post(Event:Accepted,?FindButton)
+  POST(Event:Accepted,?FindButton)
 !EndRegion OnEvent ROUTINEs
 !EndRegion Accept Loop
 
 !------------------------------------------------------
 FileAdded            ROUTINE
-  SetCursor(CURSOR:Wait)
+  SETCURSOR(CURSOR:Wait)
   IF INSTRING('.LIB', UPPER(FileName), 1, 1)
     ReadLib()
   ELSE
     ReadExecutable()
     glo:LevelOneCount += 1 
   END
-  Window{PROP:Text} = 'LibMaker - ' & CLIP(FileName)  !AB  !MG Note: This will only show that LAST file added, when multiple are added
-  !PutIni('RecentFiles','Read',FileName,qINI_File)
-  SetCursor()
+  window{PROP:Text} = 'LibMaker - ' & CLIP(FileName)  !AB  !MG Note: This will only show that LAST file added, when multiple are added
+  !PUTINI('RecentFiles','Read',FileName,qINI_File)
+  SETCURSOR()
 !========================================================================================
 !========================================================================================
 !========================================================================================
@@ -552,23 +534,21 @@ j         LONG,AUTO
    !Added code to parse the first character of the module name as when a .Net unmanaged dll
    !A \ seems to be generated as first character
    IF EXE:cstringval[1] = '\' 
-	 EXE:cstringval   = EXE:cstringval[ 2 : SIZE(EXE:cstringval) ]
+	  EXE:cstringval    = EXE:cstringval[ 2 : SIZE(EXE:cstringval) ]
    END
 
-   ExportQ.Module    = EXE:cstringval
-   ExportQ.Symbol    = EXE:cstringval
-   ExportQ.treelevel = 1
-   ExportQ.Symbol:Style      = ListStyle:Opened
-   ExportQ.ordinal   = 0
-   ExportQ.orgorder += 1 
-   !glo.Colors.Defaults[1]
-
-   ExportQ.SearchFlag= SearchFlag::Default   
+   ExportQ.Module       = EXE:cstringval
+   ExportQ.Symbol       = EXE:cstringval
+   ExportQ.treelevel    = 1
+   ExportQ.Symbol:Style = ListStyle:Opened
+   ExportQ.ordinal      = 0
+   ExportQ.orgorder    += 1 
+   ExportQ.SearchFlag   = SearchFlag::Default   
 
    ADD(ExportQ)
 
-   ExportQ.treelevel = 2
-   ExportQ.Symbol:Style      = ListStyle:None
+   ExportQ.treelevel    = 2
+   ExportQ.Symbol:Style = ListStyle:None
 
    LOOP j = 0 TO NumNames - 1
       GET(EXEfile, Names    + j*4 - ImageBase+1, SIZE(EXE:ulongval))
@@ -593,21 +573,21 @@ r  ULONG
    j =             EXE:ne_nrestab+1
    r = newoffset + EXE:ne_restab+1
    GET(EXEfile, r, SIZE(EXE:pstringval))
-   ExportQ.Module     = EXE:pstringval
-   ExportQ.symbol     = EXE:pstringval
-   ExportQ.ordinal    = 0
-   ExportQ.treelevel  = ListStyle:Opened
+   ExportQ.Module       = EXE:pstringval
+   ExportQ.symbol       = EXE:pstringval
+   ExportQ.ordinal      = 0
+   ExportQ.treelevel    = ListStyle:Opened
    ExportQ.Symbol:Style = 1
-   ExportQ.orgorder  += 1 
-   ExportQ.SearchFlag = SearchFlag::Default
+   ExportQ.orgorder    += 1 
+   ExportQ.SearchFlag   = SearchFlag::Default
 
    ADD(ExportQ)
    r += LEN(EXE:pstringval)+1    !move past module name
    r += 2                        !move past ord#
 
 ! Now pull apart the resident name table. First entry is the module name, read above
-   ExportQ.treelevel = 2
-   ExportQ.Symbol:Style      = ListStyle:None
+   ExportQ.treelevel    = 2
+   ExportQ.Symbol:Style = ListStyle:None
 
    LOOP
      GET(EXEfile, r, SIZE(EXE:pstringval))
@@ -706,39 +686,44 @@ ordinal    USHORT
    ExportQ.SearchFlag= SearchFlag::Default
    LOOP
       GET(LIBfile, i, SIZE(LIB:header))     ! Read next OMF record
-      IF ERRORCODE() OR LIB:typ = 0 OR LIB:len = 0 THEN
+      IF ERRORCODE() OR LIB:typ = 0 OR LIB:len = 0 
          BREAK                              ! All done
       END
       j = i + SIZE(LIB:header)              ! Read export info from here
       i = i + LIB:len + 3                   ! Read next OMF record from here
-      IF LIB:typ = 88H AND LIB:kind = 0A000H AND LIB:bla = 1 AND LIB:ordflag = 1 THEN
+
+      IF LIB:typ = 88H AND LIB:kind = 0A000H AND LIB:bla = 1 AND LIB:ordflag = 1 
+
           GET(LIBfile, j, SIZE(LIB:pstringval))
-          symbolname = LIB:pstringval
-          j += LEN(LIB:Pstringval)+1
+          symbolname =         LIB:pstringval
+          j +=             LEN(LIB:Pstringval)+1
+
           GET(LIBfile, j, SIZE(LIB:pstringval))
-          modulename = LIB:pstringval
-          j += LEN(LIB:Pstringval)+1
+          modulename =         LIB:pstringval
+          j +=             LEN(LIB:pstringval)+1
+
           GET(LIBfile, j, SIZE(LIB:ushortval))
           ordinal = LIB:ushortval
-          IF modulename <> lastmodule      ! A LIB can describe multiple DLLs
-             lastmodule = modulename
-             ExportQ.treelevel = 1
-             ExportQ.Symbol:Style      = ListStyle:Opened
-             ExportQ.symbol    = modulename
-             ExportQ.module    = modulename
-             ExportQ.ordinal   = 0
-             ExportQ.orgorder += 1
-             ADD(ExportQ)
-             glo:LevelOneCount += 1	
 
+          IF modulename <> lastmodule      ! A LIB can describe multiple DLLs
+             lastmodule           = modulename
+
+             ExportQ.treelevel    = 1
+             ExportQ.Symbol:Style = ListStyle:Opened
+             ExportQ.symbol       = modulename
+             ExportQ.module       = modulename
+             ExportQ.ordinal      = 0
+             ExportQ.orgorder    += 1
+             ADD(ExportQ)
+             glo:LevelOneCount   += 1	
           END
-          ExportQ.treelevel = 2
-          ExportQ.Symbol:Style      = ListStyle:None
-          ExportQ.symbol    = symbolname
-          ExportQ.module    = modulename
-          ExportQ.ordinal   = ordinal
-          ExportQ.orgorder +=1
-          !Color was set above
+
+          ExportQ.treelevel       = 2
+          ExportQ.Symbol:Style    = ListStyle:None
+          ExportQ.symbol          = symbolname
+          ExportQ.module          = modulename
+          ExportQ.ordinal         = ordinal
+          ExportQ.orgorder       +=1
           ADD(ExportQ)		  
       END
    END
@@ -766,8 +751,7 @@ InfoWindow           PROCEDURE
 !       STRING(@s3),AT(116,93,,10),USE(MyConst.Version),FONT(,,COLOR:BTNSHADOW,)
 
 
-infowin WINDOW('About LibMaker'),AT(,,234,124),FONT('MS Sans Serif',8,,FONT:regular),PALETTE(256),SYSTEM, |
-         GRAY
+infowin WINDOW('About LibMaker'),AT(,,234,124),FONT('MS Sans Serif',8,,FONT:regular),PALETTE(256),SYSTEM,GRAY
        PANEL,AT(6,6,74,86),USE(?Panel1),BEVEL(5)
        IMAGE('AB256.BMP'),AT(9,9),USE(?Image1)
        GROUP,AT(85,6,139,86),USE(?Group),COLOR(COLOR:Black)
@@ -793,12 +777,6 @@ infowin WINDOW('About LibMaker'),AT(,,234,124),FONT('MS Sans Serif',8,,FONT:regu
 
 !========================================================================================
 SelectQBE            PROCEDURE  !whole procedure written by AB
-   !Updates:
-   !  10/18/98 MG
-   !      INI work arguments
-   !      Heavy cosmetic screen changes
-   !      Call to SetColors_ExportQ
-
    !Future Features
    !  Search Options:
    !     to Add    to   the search set (i.e. OR  support)
@@ -808,10 +786,10 @@ SelectQBE            PROCEDURE  !whole procedure written by AB
 lcl           group
 SearchString    STRING(40)
 SearchOption    BYTE
-ExportQ_Rec     uLong
-SearchFlag      like(ExportQ.SearchFlag)
-UnknownFlagCnt  uLong
-              end
+ExportQ_Rec     ULONG
+SearchFlag      LIKE(ExportQ.SearchFlag)
+UnknownFlagCnt  ULONG
+              END
 
 Swindow WINDOW('Define search'),AT(,,229,38),FONT('MS Sans Serif',8,,FONT:regular),SYSTEM,GRAY
        STRING('Search for'),AT(9,3),USE(?String1)
@@ -821,68 +799,63 @@ Swindow WINDOW('Define search'),AT(,,229,38),FONT('MS Sans Serif',8,,FONT:regula
          RADIO('Starts with'),AT(71,22),USE(?Option1:Radio2),TIP('Will only find symbols that start with the search string')
        END
        BUTTON('&Search Now'),AT(128,21,48,14),USE(?SearchButton),DEFAULT
-       BUTTON('&Cancel'),AT(180,21,45,14),USE(?CloseButton),LEFT,ICON('Exit.ico'), |
-           STD(STD:Close)
+       BUTTON('&Cancel'),AT(180,21,45,14),USE(?CloseButton),LEFT,ICON('Exit.ico'),STD(STD:Close)
      END
   !Todo: Consider changing "symbol" to "Function/Module"
   CODE
-  lcl.SearchString = GetIni('Search','For'   ,'',qINI_File)
-  lcl.SearchOption = GetIni('Search','Method',2 ,qINI_File)
+  lcl.SearchString = GETINI('Search','For'   ,'',qINI_File)
+  lcl.SearchOption = GETINI('Search','Method',2 ,qINI_File)
   OPEN(Swindow)
-  DISPLAY
-  accept
-    case ACCEPTED()
-      of ?SearchButton; DO SearchQueue
-                        Break !close window
-    end  !case Accepted
-  END !Accept Loop
-  PutIni('Search','For'   ,lcl.SearchString,qINI_File)
-  PutIni('Search','Method',lcl.SearchOption,qINI_File)
+  DISPLAY()
+  ACCEPT
+    CASE ACCEPTED()
+      OF ?SearchButton; DO SearchQueue
+                        BREAK !close window
+    END  
+  END
+  PUTINI('Search','For'   ,lcl.SearchString,qINI_File)
+  PUTINI('Search','Method',lcl.SearchOption,qINI_File)
 
 !-------------------------------------------------------------
 SearchQueue        ROUTINE  !of SelectQBE
-data
-rou group
-!SearchString    Like(lcl.SearchString),auto
-SearchString    cstring(Size(lcl.SearchString))  !Use Cstring, so don't have to clip inside of "contains" loop
-LenSS           uShort!,auto !Length of SearchStrign
-    end
-  code
-  rou.SearchString = Upper(clip(lcl.SearchString))
+  DATA
+rou         GROUP
+SearchString    CSTRING(SIZE(lcl.SearchString))  !Use Cstring, so don't have to clip inside of "contains" loop
+LenSS           USHORT!,auto !Length of SearchStrign
+            END
+  CODE
+  rou.SearchString = UPPER(CLIP(lcl.SearchString))
 
-  SetCursor(Cursor:Wait)
+  SETCURSOR(Cursor:Wait)
   lcl.UnknownFlagCnt = 0
   glo.FoundCount     = 0 
 
-  if lcl.SearchOption = 1  !Contains
-    loop lcl.ExportQ_Rec = 1 TO Records(ExportQ)
-      get(ExportQ,lcl.ExportQ_Rec)
-     !lcl.SearchFlag = Choose( Instring(CLIP(UPPER(lcl.SearchString)),CLIP(UPPER(ExportQ.Symbol)),1,1) > 1 |
-     !lcl.SearchFlag = Choose( Instring(clip(rou.SearchString)       ,Upper(Clip(ExportQ.Symbol)),1,1) > 0 |
-      lcl.SearchFlag = Choose( Instring(rou.SearchString             ,Upper(Clip(ExportQ.Symbol)),1,1) > 0 |
+  IF lcl.SearchOption = 1  !Contains
+    LOOP lcl.ExportQ_Rec = 1 TO RECORDS(ExportQ)
+      GET(ExportQ,lcl.ExportQ_Rec)
+      lcl.SearchFlag = CHOOSE( INSTRING(rou.SearchString ,UPPER(CLIP(ExportQ.Symbol)),1,1) > 0 |
                                ,SearchFlag::Found   |
                                ,SearchFlag::Default |
                              )
-      do Update_ExportQ
-    end !loop
+      DO Update_ExportQ
+    END !loop
 
-  else  !SearchOption must be "Starts With"
+  ELSE  !SearchOption must be "Starts With"
     rou.LenSS = LEN(CLIP(lcl.SearchString))
-    loop lcl.ExportQ_Rec = 1 TO Records(ExportQ)
-      get(ExportQ,lcl.ExportQ_Rec)
-     !lcl.SearchFlag = Choose( upper(ExportQ.Symbol[1 : LEN(CLIP(lcl.SearchString))]) = CLIP(UPPER(lcl.SearchString)) |
-      lcl.SearchFlag = Choose( upper(ExportQ.Symbol[1 : rou.LenSS]) = rou.SearchString |
+    LOOP lcl.ExportQ_Rec = 1 TO RECORDS(ExportQ)
+      GET(ExportQ,lcl.ExportQ_Rec)
+      lcl.SearchFlag = CHOOSE( UPPER(ExportQ.Symbol[1 : rou.LenSS]) = rou.SearchString |
                                ,SearchFlag::Found   |
                                ,SearchFlag::Default |
                              )
-      do Update_ExportQ
-    end !loop
-  end !if lcl.SearchOption = 1
+      DO Update_ExportQ
+    END !loop
+  END !if lcl.SearchOption = 1
 
-  SetCursor()
-  if lcl.UnknownFlagCnt  !can be incremented in Update_ExportQ ROUTINE
-     Message('Unknown SearchFlag happened [' & lcl.UnknownFlagCnt & '] times','Programming Error',Icon:Exclamation)
-  end
+  SETCURSOR()
+  IF lcl.UnknownFlagCnt  !can be incremented in Update_ExportQ ROUTINE
+     MESSAGE('Unknown SearchFlag happened [' & lcl.UnknownFlagCnt & '] times','Programming Error',Icon:Exclamation)
+  END
 	
   ExportQ_to_FilterQ()
 	
@@ -891,36 +864,28 @@ Update_ExportQ  ROUTINE  !of SelectQBE, called by SearchQueue
   !todo set ExportQ.Symbol:Style to match Default & Found
   !  note: will need to set prop:iconList,2 & 3 upstream
 
-  if lcl.SearchFlag = SearchFlag::Found then glo.FoundCount += 1 end 
+  IF lcl.SearchFlag = SearchFlag::Found THEN glo.FoundCount += 1 END
 
-  case lcl.SearchFlag
-    of ExportQ.SearchFlag
+  CASE lcl.SearchFlag
+    OF ExportQ.SearchFlag
              !do nothing we're already set
 
-    of SearchFlag::Default
-             !ExportQ.ColorNFG = glo.Colors.Defaults[ExportQ.treeLevel].NFG
-             !ExportQ.ColorNBG = glo.Colors.Defaults[ExportQ.treeLevel].NBG
-             !ExportQ.ColorSFG = glo.Colors.Defaults[ExportQ.treeLevel].SFG
-             !ExportQ.ColorSBG = glo.Colors.Defaults[ExportQ.treeLevel].SBG
+    OF SearchFlag::Default
              ExportQ.SearchFlag   = lcl.SearchFlag
-             case ExportQ.TreeLevel
-               of  1; ExportQ.Symbol:Style = ListStyle:Opened
-               of -1; ExportQ.Symbol:Style = ListStyle:Closed
-             else   ; ExportQ.Symbol:Style = ListStyle:None
-             end
-             Put(ExportQ)
+             CASE ExportQ.TreeLevel
+               OF  1; ExportQ.Symbol:Style = ListStyle:Opened
+               OF -1; ExportQ.Symbol:Style = ListStyle:Closed
+             ELSE   ; ExportQ.Symbol:Style = ListStyle:None
+             END
+             PUT(ExportQ)
 
-    of SearchFlag::Found
-             !ExportQ.ColorNFG = glo.Colors.Found[ExportQ.treeLevel].NFG
-             !ExportQ.ColorNBG = glo.Colors.Found[ExportQ.treeLevel].NBG
-             !ExportQ.ColorSFG = glo.Colors.Found[ExportQ.treeLevel].SFG
-             !ExportQ.ColorSBG = glo.Colors.Found[ExportQ.treeLevel].SBG
+    OF SearchFlag::Found
              ExportQ.SearchFlag   = lcl.SearchFlag
-             ExportQ.Symbol:Style         = ListStyle:Found
-             Put(ExportQ)
+             ExportQ.Symbol:Style = ListStyle:Found
+             PUT(ExportQ)
 
-  else       lcl.UnknownFlagCnt += 1
-  end !case lcl.SearchFlag
+  ELSE       lcl.UnknownFlagCnt += 1
+  END !case lcl.SearchFlag
 
 !========================================================================================
 ExportQ_to_FilterQ   PROCEDURE()
@@ -961,13 +926,13 @@ GenerateMap      PROCEDURE(BYTE argRonsFormat) !writes out all info in the expor
 
 
 
-lcl             group
+lcl             GROUP
 exq_rec            USHORT
-symbol             like(ExportQ.symbol)!,auto
-instringLoc        ushort
-CurrModule         like(ExportQ.Module) !no auto
-Assumed_Attributes string(',pascal,raw,dll(1)')
-MaxSymLen   LONG
+symbol             LIKE(ExportQ.symbol)!,auto
+instringLoc        USHORT
+CurrModule         LIKE(ExportQ.Module) !no auto
+Assumed_Attributes STRING(',pascal,raw,dll(1)')
+MaxSymLen          LONG
                 end
 
    CODE
@@ -978,55 +943,55 @@ MaxSymLen   LONG
 
    LOOP lcl.exq_rec = 1 TO RECORDS(ExportQ)
       GET(ExportQ, lcl.exq_rec)
-      case ExportQ.Treelevel
-        of 1; DO   TreeLevel1
-        of 2; DO   TreeLevel2
-      end 
+      CASE ExportQ.Treelevel
+        OF 1; DO   TreeLevel1
+        OF 2; DO   TreeLevel2
+      END 
    END
 
-   if argRonsFormat
+   IF argRonsFormat
         Ascii:Line = ''
-   else Ascii:Line = '<32>{5}end !module(''' & clip(lcl.CurrModule) & ''')'     !Should be what we saved the .LIB as
-   end
+   ELSE Ascii:Line = '<32>{5}end !module(''' & CLIP(lcl.CurrModule) & ''')'     !Should be what we saved the .LIB as
+   END
    
-   Add  (ASCIIFile)
+   ADD  (ASCIIFile)
    CLOSE(Asciifile)
 
 TreeLevel1 ROUTINE        
-    if lcl.exq_rec >1
-       if argRonsFormat
+    IF lcl.exq_rec >1
+       IF argRonsFormat
             Ascii:Line = ''
-       else Ascii:Line = '<32>{5}end !module(''' & clip(lcl.CurrModule) & ''')'     !Should be what we saved the .LIB as
-       end
-       Add(ASCIIFile)
+       ELSE Ascii:Line = '<32>{5}end !module(''' & CLIP(lcl.CurrModule) & ''')'     !Should be what we saved the .LIB as
+       END
+       ADD(ASCIIFile)
        Ascii:Line = ''
-       Add(ASCIIFile)
-    end
+       ADD(ASCIIFile)
+    END
     !---------- replace the .DLL or .EXE module extension with .LIB
     lcl.CurrModule      = ExportQ.module
-    lcl.instringLoc     = instring('.DLL',upper(lcl.CurrModule),1,1)
-    if ~lcl.instringLoc
-        lcl.instringLoc = instring('.EXE',upper(lcl.CurrModule),1,1)
-    end
-    if lcl.instringLoc
+    lcl.instringLoc     = INSTRING('.DLL',UPPER(lcl.CurrModule),1,1)
+    IF ~lcl.instringLoc
+        lcl.instringLoc = INSTRING('.EXE',UPPER(lcl.CurrModule),1,1)
+    END
+    IF lcl.instringLoc
        lcl.CurrModule[lcl.instringLoc + 1 : lcl.instringLoc + 3] = 'lib'
-    end
+    END
     !---------- replace the .DLL or .EXE module extension with .LIB -end
-    if argRonsFormat
+    IF argRonsFormat
          ! API Name|Library|DLL|Equate File|Structure File
          Ascii:Line = 'Todo Header Line: API Name|Library|DLL|Equate File|Structure File'  !<--- todo
-    else Ascii:Line = '<32>{5}module(''' & clip(lcl.CurrModule) & ''')'             !Should be what we saved the .LIB as
-    end
-    Add(ASCIIFile)
+    ELSE Ascii:Line = '<32>{5}module(''' & CLIP(lcl.CurrModule) & ''')'             !Should be what we saved the .LIB as
+    END
+    ADD(ASCIIFile)
 
 TreeLevel2 ROUTINE
     lcl.symbol = CleanSymbol(ExportQ.symbol)
-    if argRonsFormat
+    IF argRonsFormat
          ! Procedure|Prototype|Proc Attributes|Proc Name
-         Ascii:Line =             clip(lcl:symbol) &'|<32>{40}|'& clip(lcl.Assumed_Attributes) & '|'   & clip(ExportQ.symbol)
-    else Ascii:Line = '<32>{8}' & clip(lcl.symbol) & all('<32>',lcl.MaxSymLen - len(clip(lcl.Symbol))) & '(<9>{4}),pascal,raw,dll(1),name(''' & clip(ExportQ.symbol) & ''')'
-    end
-    Add(ASCIIFile)
+         Ascii:Line =             CLIP(lcl:symbol) &'|<32>{40}|'& CLIP(lcl.Assumed_Attributes) & '|'   & CLIP(ExportQ.symbol)
+    ELSE Ascii:Line = '<32>{8}' & CLIP(lcl.symbol) & ALL('<32>',lcl.MaxSymLen - LEN(CLIP(lcl.Symbol))) & '(<9>{4}),pascal,raw,dll(1),name(''' & CLIP(ExportQ.symbol) & ''')'
+    END
+    ADD(ASCIIFile)
    
 !========================================================================================
 CleanSymbol   PROCEDURE(STRING xSymbol)!,STRING
@@ -1046,7 +1011,7 @@ AtIsAt   LONG,AUTO
    AtIsAt = INSTRING('@', xSymbol,1)
    IF  AtIsAt <> 0
        xSymbol = xSymbol[ 1 : AtIsAt - 1 ]  !BUG: for some DLL`s, I found one compiled with CBuilder 1.0, that this would be bad for
-   end   
+   END   
    RETURN xSymbol
    
 !========================================================================================
@@ -1060,14 +1025,14 @@ instringLoc   LONG,AUTO
    RetMaxSymLen = 0
    LOOP QRec = 1 TO RECORDS(ExportQ)
       GET(ExportQ, QRec)
-      case ExportQ.treelevel
-        of 2; CurrSymLen = len(clip( CleanSymbol( ExportQ.symbol)))
-              if RetMaxSymLen < CurrSymLen
+      CASE ExportQ.treelevel
+        OF 2; CurrSymLen = LEN(CLIP( CleanSymbol( ExportQ.symbol)))
+              IF RetMaxSymLen < CurrSymLen
                  RetMaxSymLen = CurrSymLen
-              end
+              END
               !MG: should cache this strip'd symbol in a queue, and process that intead vs. duplicating the effort below
-      end
-   end
+      END
+   END
    RETURN RetMaxSymLen
    
 
@@ -1130,8 +1095,8 @@ Ascii_Start             ROUTINE
    OPEN(ASCIIFile)
 
 Ascii_Done              ROUTINE
-      FLUSH(ASCIIFile)
-      CLOSE(ASCIIfile)
+   FLUSH(ASCIIFile)
+   CLOSE(ASCIIfile)
 
 !Region Generate:INC
 Generate:AllINC    ROUTINE
@@ -1219,8 +1184,7 @@ szCleanedSymbol   CSTRING(SIZE(ExportQ.symbol) + 1)
                           & '(<9>{4}),pascal,raw,dll(1),name(<39>' & CLIP(ExportQ.symbol) & '<39>)')
       END
       GET( ExportQ,  POINTER(ExportQ) +1)
-   END   
-   
+   END      
 
 Generate:OneCLW_Methods ROUTINE
    GET( ExportQ,  POINTER(ExportQ) +1 )
@@ -1241,25 +1205,18 @@ szCleanedSymbol   CSTRING(SIZE(ExportQ.symbol) + 1)
    AppendAscii('')
    AppendAscii(ClassName &'.'& szCleanedSymbol    & ALL('<32>',MaxSymLen - LEN(szCleanedSymbol))   & 'PROCEDURE(  )')
    AppendAscii('   CODE')
-   
-               
-
-  
-
 
 AppendAscii    PROCEDURE(STRING xLine)  
    CODE
    ASCII:Line = xLine
    ADD(ASCIIFile)
-   
-
-   
+      
 InitList   PROCEDURE(SIGNED xFEQ)
    CODE    
-   xFEQ{PROP:LineHeight}                        = 9
-   xFEQ{proplist:Width,1}                       = xFEQ{prop:Width} - qOrdColWidth
+   xFEQ{PROP:LineHeight}                           = 9
+   xFEQ{proplist:Width,1}                          = xFEQ{prop:Width} - qOrdColWidth
 
-   xFEQ{PROPStyle:TextColor   , ListStyle:None   }  = COLOR:Black
+   xFEQ{PROPStyle:TextColor   , ListStyle:None   } = COLOR:Black
 
    xFEQ{PROPStyle:TextColor   , ListStyle:Opened } = COLOR:Green
    xFEQ{PROPStyle:TextSelected, ListStyle:Opened } = COLOR:White
