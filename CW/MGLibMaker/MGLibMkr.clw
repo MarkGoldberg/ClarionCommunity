@@ -104,6 +104,7 @@
         GenerateMap          (BYTE argRonsFormat)
         SelectQBE            ()
         ExportQ_to_FilterQ   ()
+        GenerateCode         ()
         GenerateClasses      ()
         LongestSymbol        (),LONG   !in ExportQ Level 2
         CleanSymbol          (STRING xSymbol),STRING
@@ -112,6 +113,7 @@
         InitList             (SIGNED xFeq)
      END
 
+!region above window structure
      INCLUDE(   'KeyCodes.clw'),ONCE
      INCLUDE(    'Equates.clw'),ONCE
      INCLUDE(   'FileDefs.inc'),ONCE
@@ -135,11 +137,11 @@ module             STRING(FILE:MaxFilePath)  !Modified by MJS to allow for longe
 OrgOrder           LONG          
 SearchFlag         Byte          !MG (enum field, see SearchFlag::* below)
                 END
-          
-!Region - Tmp Region          
 FilteredQ QUEUE(ExportQ),PRE(FLTQ)
           END
 
+!EndRegion above window structure          
+!Region - Tmp Region          
 
 window WINDOW('MGLibMkr')                 ,AT(   ,   ,288,185),CENTER,GRAY,IMM,SYSTEM,ICON('LIBRARY.ICO'), FONT('Segoe UI'),ALRT(DeleteKey),DROPID('~FILE'),RESIZE
       TOOLBAR                             ,AT(  0,  0,288, 22),USE(?TOOLBAR1),COLOR(COLOR:ACTIVECAPTION)
@@ -199,7 +201,7 @@ PostAccept           ROUTINE
    !  PUTINI('Position','Col1W',?List1{proplist:Width,1},qINI_FILE)
    END
    PUTINI('Settings','RonsFormat',glo.RonsFormat,qINI_FILE)
-!------------------------------------------------------
+!-----------------------------------------------------
 PreAccept            ROUTINE
    OPEN(window)
    SYSTEM{prop:Icon} = window{prop:icon} !Have any non-minimize-able additional windows share the same Icon
@@ -244,11 +246,12 @@ PreAccept            ROUTINE
 
 
 
+!------------------------------------------------------
 PreAccept:CommandLine ROUTINE    
 
    FileName = CLIP(LEFT(COMMAND('READ')))
                                           ! DBG.Debugout('(from Command()) FileName['& FileName &'] Path()['& PATH() &']')
-   IF len(CLIP(FileName))
+   IF LEN(CLIP(FileName))
         DO FileAdded        
    ELSE POST(Event:Accepted,?AddFile)
    END
@@ -256,7 +259,7 @@ PreAccept:CommandLine ROUTINE
    IF COMMAND('WRITE') AND RECORDS(ExportQ)
       FileName = COMMAND('WRITE')
                                           ! DBG.Debugout('Write Filename['& CLIP(FileName) &']')
-	  SetCursor(CURSOR:Wait)                            
+	  SETCURSOR(CURSOR:Wait)                            
 	 ! SORT(ExportQ  ,ExportQ.orgorder)                        
 	 ! SORT(FilteredQ,FLTQ:orgorder)                         
 	  WriteLib()
@@ -297,7 +300,7 @@ AcceptLoop           ROUTINE
      
      IF MGResizeClass.Perform_Resize()
         ?List1   {proplist:Width,1} = ?List1   {prop:Width} - qOrdColWidth
-	    ?Filtered{proplist:Width,1} = ?Filtered{prop:Width} - qOrdColWidth
+        ?Filtered{proplist:Width,1} = ?Filtered{prop:Width} - qOrdColWidth
      END
      
      DO EnableDisable
@@ -309,9 +312,11 @@ Set_DisplayCount     ROUTINE
   glo.DisplayCount = RECORDS(ExportQ)
   ?Tab:All{PROP:Text} = 'All ['& RECORDS(ExportQ) - glo.LevelOneCount & ']' ! not entirely accurate, as the Module is listed in the queue.
 
+!-----------------------------------------------------
 Set_FoundCount       ROUTINE 
  ?Tab:Filtered{PROP:Text} = 'Matches to Search Only ['& glo.FoundCount & ']'
 
+!-----------------------------------------------------
 OnTabChanging        ROUTINE 
   ExportQ_to_FilterQ() !could be a bit more subtle, to only catch when switching TO the FilterQ 
   DO Set_FoundCount
@@ -328,6 +333,7 @@ EnableDisable       ROUTINE
   
 
 !Region Accepted ROUTINEs
+!-----------------------------------------------------
 Accepted:SortOrder ROUTINE       
    SETCURSOR(CURSOR:Wait)
    EXECUTE glo.SortOrder ! CHOICE(?glo:SortOrder)
@@ -339,12 +345,14 @@ Accepted:SortOrder ROUTINE
    ?Filtered{PROP:Format} = ?Filtered{PROP:Format} !<-- Added to force re-draw of Q (needed in C5EEB4 and likely elsewhere)
    SETCURSOR()
    
+!-----------------------------------------------------
 Accepted:FindButton ROUTINE
    SelectQBE()
    ?List1   {PROP:Format} = ?List1   {PROP:Format} !<-- Added to force re-draw of Q (needed in C5EEB4 and likely elsewhere)
    ?Filtered{PROP:Format} = ?Filtered{PROP:Format} !<-- Added to force re-draw of Q (needed in C5EEB4 and likely elsewhere)
    DO Set_FoundCount
 
+!-----------------------------------------------------
 Accepted:Clear ROUTINE       
    FREE(ExportQ); FREE(FilteredQ)   
    glo:LevelOneCount = 0
@@ -354,6 +362,7 @@ Accepted:Clear ROUTINE
    Window{PROP:Text} = 'LibMaker'
    DISPLAY()
 
+!-----------------------------------------------------
 Accepted:AddFile  ROUTINE
    IF FILEDIALOG('Import symbols from file ...', FileName, |
                  'DLLs and LIBs|*.dll;*.lib|DLL files (*.dll)|*.dll|LIB files (*.lib)|*.lib|Executables (*.exe)|All files (*.*)|*.*', |
@@ -362,6 +371,7 @@ Accepted:AddFile  ROUTINE
      DO FileAdded
    END   
 
+!-----------------------------------------------------
 Accepted:SaveAs   ROUTINE       
    IF RECORDS(ExportQ)>0
      CLEAR(FileName) !FileName = WriteFileName
@@ -378,6 +388,7 @@ Accepted:SaveAs   ROUTINE
 !EndRegion
 !Region OnEvent ROUTINEs
 
+!-----------------------------------------------------
 OnExpandContract     ROUTINE     
     !TODO: Bug FilterdQ
     i# = ?List1{PROPLIST:MouseDownRow}
@@ -392,6 +403,7 @@ OnExpandContract     ROUTINE
     PUT(ExportQ)
     DISPLAY(?list1)
 
+!-----------------------------------------------------
 OnAlertKey           ROUTINE       
    !TODO: Bug FilterdQ
     IF KEYCODE()=DeleteKey
@@ -412,6 +424,7 @@ OnAlertKey           ROUTINE
        DISPLAY(?list1)
     END !IF KeyCode()=DeleteKey
 
+!-----------------------------------------------------
 OnDrop               ROUTINE       
   !Message('We got a drop event!|Drop() [' & DropID() & ']','debug')
   !TODO: Support for MULTIPLE Files at once
@@ -420,6 +433,7 @@ OnDrop               ROUTINE
   DO FileAdded
   
 
+!-----------------------------------------------------
 OnLocate             ROUTINE       
   BEEP()  !debugging beep (never happens--bug!)
   !note, ,VCR(?FindButton) doesn't work for me either
@@ -463,6 +477,7 @@ ReadExecutable       PROCEDURE !gets export table from 16 or 32-bit file or LIB 
    END
    CLOSE(EXEfile)
 
+!-----------------------------------------------------
 ReadExecutable:PE ROUTINE 
   DATA 
 sectheaders ULONG   ! File offset to section headers
@@ -733,18 +748,18 @@ InfoWindow           PROCEDURE
 
 
 infowin WINDOW('About LibMaker'),AT(,,229,185),GRAY,SYSTEM,FONT('Segoe UI',8,,FONT:regular),PALETTE(256)
-       PANEL,AT(6,6,74,86),USE(?Panel1),BEVEL(5)
-       IMAGE('AB256.BMP'),AT(9,9),USE(?Image1)
-       GROUP,AT(85,6,139,86),USE(?Group),COLOR(COLOR:Black)
-         STRING('LibMaker'),AT(87,9,135,16),USE(?String1),TRN,CENTER,FONT('Arial',14,,FONT:bold)
-         BOX,AT(85,6,139,86),USE(?Box1),COLOR(COLOR:Black),FILL(COLOR:BTNSHADOW),LINEWIDTH(2)
-         STRING('Modified:'),AT(97,30),USE(?String3),TRN,RIGHT
+		PANEL,AT(6,6,74,86),USE(?Panel1),BEVEL(5)
+		IMAGE('AB256.BMP'),AT(9,9),USE(?Image1)
+		GROUP,AT(85,6,139,86),USE(?Group),COLOR(COLOR:Black)
+			STRING('LibMaker'),AT(87,9,135,16),USE(?String1),TRN,CENTER,FONT('Arial',14,,FONT:bold)
+			BOX,AT(85,6,139,86),USE(?Box1),COLOR(COLOR:Black),FILL(COLOR:BTNSHADOW),LINEWIDTH(2)
+			STRING('Modified:'),AT(97,30),USE(?String3),TRN,RIGHT
          STRING('Arnór Baldvinsson'),AT(135,30),USE(?String4),TRN
-         STRING('Denmark'),AT(135,41),USE(?String6),TRN
-         STRING('E-mail:'),AT(99,57),USE(?String7),TRN,RIGHT
-         STRING('arnorbld@post3.tele.dk'),AT(135,57),USE(?String8),TRN
-         STRING('http://www.icetips.com'),AT(135,70,76,10),USE(?String10),TRN
-       END
+			STRING('Denmark'),AT(135,41),USE(?String6),TRN
+			STRING('E-mail:'),AT(99,57),USE(?String7),TRN,RIGHT
+			STRING('arnorbld@post3.tele.dk'),AT(135,57),USE(?String8),TRN
+			STRING('http://www.icetips.com'),AT(135,70,76,10),USE(?String10),TRN
+		END
 		STRING('Additional Modifications:'),AT(12,102),USE(?String9)
 		STRING('Mark Goldberg and Mark Sarson'),AT(103,102),USE(?String11),FONT(,,,FONT:bold)
 		BUTTON('&Close'),AT(174,164,50,16),USE(?Button1),STD(STD:Close),ICON('Exit.ico'),DEFAULT,LEFT
@@ -752,7 +767,7 @@ infowin WINDOW('About LibMaker'),AT(,,229,185),GRAY,SYSTEM,FONT('Segoe UI',8,,FO
 		PROMPT('You can drag a DLL from explorer to  LibMaker'),AT(40,123),USE(?PROMPT1)
 		STRING('TIP:'),AT(12,137,13,10),USE(?STRING2:2),FONT(,,,FONT:bold)
 		PROMPT('Command line arguments<13,10>READ="FileName"<13,10>WRITE="FileName"<13,10>/CLOSE'),AT(40,137,130,44),USE(?PROMPT2)
-     END
+	END
 
    CODE
    OPEN(infowin)
@@ -780,12 +795,12 @@ Swindow WINDOW('Search'),AT(,,229,65),GRAY,SYSTEM,FONT('Segoe UI',8,,FONT:regula
 		OPTION,AT(17,26,11,10),USE(lcl.SearchOption)
 			RADIO('Contains'),AT(18,28),USE(?Option1:Radio1),TIP('Will find symbols that have the search string in them ANYWHERE')
 			RADIO('Starts with'),AT(18,41),USE(?Option1:Radio2),TIP('Will only find symbols that start with the search string')
-       END
+		END
 		STRING('Search for'),AT(7,3),USE(?String1),FONT(,,COLOR:BTNSHADOW)
 		ENTRY(@s20),AT(7,12,215,10),USE(lcl.SearchString)
 		BUTTON('&Search Now'),AT(100,39,57,18),USE(?SearchButton),DEFAULT
 		BUTTON('&Cancel'),AT(165,39,57,18),USE(?CloseButton),STD(STD:Close),ICON('Exit.ico'),LEFT
-     END
+	END
   !Todo: Consider changing "symbol" to "Function/Module"
   CODE
   lcl.SearchString = GETINI('Search','For'   ,'',qINI_File)
@@ -947,13 +962,14 @@ MaxSymLen          LONG
    ELSE Ascii:Line = '<32>{5}end !module(''' & CLIP(lcl.CurrModule) & ''')'     !Should be what we saved the .LIB as
    END
    
-   ADD  (ASCIIFile)
+   ADD  (AsciiFile)
    CLOSE(Asciifile)
 
    IF MESSAGE('Would you like to view the map with Notepad?','Note',ICON:Question,Button:Yes+Button:No,Button:Yes)=Button:Yes
       RUN('notepad ' & FileName)
    END
 
+!-----------------------------------------------------
 TreeLevel1 ROUTINE        
     IF lcl.exq_rec >1
        IF argRonsFormat
@@ -981,6 +997,7 @@ TreeLevel1 ROUTINE
     END
     ADD(ASCIIFile)
 
+!-----------------------------------------------------
 TreeLevel2 ROUTINE
     lcl.symbol = CleanSymbol(ExportQ.symbol)
     IF argRonsFormat
@@ -1077,6 +1094,7 @@ MaxSymLen      LONG,AUTO !Used For Alignment
       RUN('Explorer ' & GenDir)
    END 
 
+!-----------------------------------------------------
 PromptForFolder ROUTINE !may return
    GenDir = 'C:\Tmp\GenDir' !<-- TODO Fix
    IF NOT FileDialog('Where should I generate the classes?', GenDir, 'All Directories|*.*',FILE:KeepDir + FILE:NoError + FILE:LongName + FILE:Directory)
@@ -1087,13 +1105,15 @@ PromptForFolder ROUTINE !may return
    END
 
 
+!-----------------------------------------------------
 SetNames            ROUTINE
    ModuleBaseName = SUB(ExportQ.module, 1, INSTRING('.',ExportQ.module,1,1) - 1)
    CLW_Name       = 'ct' & ModuleBaseName & '.clw'
    INC_Name       = 'ct' & ModuleBaseName & '.inc'
    ClassName      = 'ct' & ModuleBaseName 
 
-Ascii_Start             ROUTINE   
+!-----------------------------------------------------
+Ascii_Start               ROUTINE   
    CREATE(ASCIIfile)
    IF ERRORCODE()
       MESSAGE('Failed to Create File['& FileName &']')
@@ -1101,12 +1121,14 @@ Ascii_Start             ROUTINE
    END
    OPEN(ASCIIFile)
 
-Ascii_Done              ROUTINE
+!-----------------------------------------------------
+Ascii_Done                ROUTINE
    FLUSH(ASCIIFile)
    CLOSE(ASCIIfile)
 
 !Region Generate:INC
-Generate:AllINC    ROUTINE
+!-----------------------------------------------------
+Generate:AllINC           ROUTINE
    GET(ExportQ, 1)
    LOOP WHILE NOT ERRORCODE()
       DO SetNames
@@ -1117,6 +1139,7 @@ Generate:AllINC    ROUTINE
       GET( ExportQ,  POINTER(ExportQ) +1)
    END
 
+!-----------------------------------------------------
    
 Generate:OneINC_Methods   ROUTINE
    GET( ExportQ,  POINTER(ExportQ) +1 )
@@ -1130,7 +1153,7 @@ Generate:OneINC_Methods   ROUTINE
 
    
    
-   
+!-----------------------------------------------------
 Generate:OneINC_Fill ROUTINE   
    AppendAscii('!ABCIncludeFile(Yada)')
    AppendAscii('')
@@ -1146,6 +1169,7 @@ Generate:OneINC_Fill ROUTINE
    AppendAscii( ALL(' ', LEN(ClassName) + 2) & 'END')
 !EndRegion Generate:INC
    
+!-----------------------------------------------------
 Generate:AllCLW    ROUTINE
    GET(ExportQ, 1)
    LOOP WHILE NOT ERRORCODE()
@@ -1157,6 +1181,7 @@ Generate:AllCLW    ROUTINE
       GET( ExportQ,  POINTER(ExportQ) +1)
    END
 
+!-----------------------------------------------------
 Generate:OneCLW_Fill ROUTINE   
    DATA
 OrigPtr LONG,AUTO   
@@ -1176,6 +1201,7 @@ OrigPtr LONG,AUTO
    
    DO Generate:OneCLW_Methods
 
+!-----------------------------------------------------
 Generate:OneCLW_MAP     ROUTINE
    DATA
 szCleanedSymbol   CSTRING(SIZE(ExportQ.symbol) + 1)
@@ -1193,6 +1219,7 @@ szCleanedSymbol   CSTRING(SIZE(ExportQ.symbol) + 1)
       GET( ExportQ,  POINTER(ExportQ) +1)
    END      
 
+!-----------------------------------------------------
 Generate:OneCLW_Methods ROUTINE
    GET( ExportQ,  POINTER(ExportQ) +1 )
    LOOP WHILE NOT ERRORCODE()
@@ -1203,6 +1230,7 @@ Generate:OneCLW_Methods ROUTINE
       GET( ExportQ,  POINTER(ExportQ) +1)
    END   
 
+!-----------------------------------------------------
 Generate:OneCLW_Methods:One   ROUTINE
    DATA
 szCleanedSymbol   CSTRING(SIZE(ExportQ.symbol) + 1)
@@ -1213,11 +1241,14 @@ szCleanedSymbol   CSTRING(SIZE(ExportQ.symbol) + 1)
    AppendAscii(ClassName &'.'& szCleanedSymbol    & ALL('<32>',MaxSymLen - LEN(szCleanedSymbol))   & 'PROCEDURE(  )')
    AppendAscii('   CODE')
 
+
+!========================================================================================
 AppendAscii    PROCEDURE(STRING xLine)  
    CODE
    ASCII:Line = xLine
    ADD(ASCIIFile)
       
+!========================================================================================
 InitList   PROCEDURE(SIGNED xFEQ)
    CODE    
    xFEQ{PROP:LineHeight}                           = 9
@@ -1237,7 +1268,7 @@ InitList   PROCEDURE(SIGNED xFEQ)
    xFEQ{PROPSTYLE:FontSize    , ListStyle:Closed } = 10
    xFEQ{PROPSTYLE:FontStyle   , ListStyle:Closed } = FONT:Bold
 
-   xFEQ{PROPStyle:TextColor   , ListStyle:Found }  = COLOR:Blue
+   xFEQ{PROPStyle:TextColor   , ListStyle:Found  } = COLOR:Blue
 
 
 
