@@ -751,7 +751,7 @@ InfoWindow           PROCEDURE
 !       STRING(@s3),AT(116,93,,10),USE(MyConst.Version),FONT(,,COLOR:BTNSHADOW,)
 
 
-infowin WINDOW('About LibMaker'),AT(,,234,124),FONT('MS Sans Serif',8,,FONT:regular),PALETTE(256),SYSTEM,GRAY
+infowin WINDOW('About LibMaker'),AT(,,229,185),GRAY,SYSTEM,FONT('Segoe UI',8,,FONT:regular),PALETTE(256)
        PANEL,AT(6,6,74,86),USE(?Panel1),BEVEL(5)
        IMAGE('AB256.BMP'),AT(9,9),USE(?Image1)
        GROUP,AT(85,6,139,86),USE(?Group),COLOR(COLOR:Black)
@@ -764,9 +764,13 @@ infowin WINDOW('About LibMaker'),AT(,,234,124),FONT('MS Sans Serif',8,,FONT:regu
          STRING('arnorbld@post3.tele.dk'),AT(135,57),USE(?String8),TRN
          STRING('http://www.icetips.com'),AT(135,70,76,10),USE(?String10),TRN
        END
-       STRING('Additional Modifications:'),AT(4,102),USE(?String9)
-       STRING('Mark Goldberg'),AT(81,102),USE(?String11),FONT(,,,FONT:bold)
-       BUTTON('&Close'),AT(184,107,45,14),USE(?Button1),LEFT,ICON('Exit.ico'),STD(STD:Close),DEFAULT
+		STRING('Additional Modifications:'),AT(12,102),USE(?String9)
+		STRING('Mark Goldberg and Mark Sarson'),AT(103,102),USE(?String11),FONT(,,,FONT:bold)
+		BUTTON('&Close'),AT(174,164,50,16),USE(?Button1),STD(STD:Close),ICON('Exit.ico'),DEFAULT,LEFT
+		STRING('TIP:'),AT(12,123),USE(?STRING2),FONT(,,,FONT:bold)
+		PROMPT('You can drag a DLL from explorer to  LibMaker'),AT(40,123),USE(?PROMPT1)
+		STRING('TIP:'),AT(12,137,13,10),USE(?STRING2:2),FONT(,,,FONT:bold)
+		PROMPT('Command line arguments<13,10>READ="FileName"<13,10>WRITE="FileName"<13,10>/CLOSE'),AT(40,137,130,44),USE(?PROMPT2)
      END
 
    CODE
