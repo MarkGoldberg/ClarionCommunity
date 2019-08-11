@@ -119,7 +119,7 @@
 MGResizeClass ResizeClassType
 
 Glo             GROUP
-SortOrder          STRING('Original')
+SortOrder          LONG(1)
 DisplayCount       ULONG
 FoundCount         ULONG 
 RonsFormat         BYTE
@@ -141,29 +141,25 @@ FilteredQ QUEUE(ExportQ),PRE(FLTQ)
           END
 
 
-window WINDOW('MGLibMkr')                 ,AT(   ,   ,288,207),CENTER,GRAY,IMM,SYSTEM,ICON('LIBRARY.ICO'), FONT('Segoe UI'),ALRT(DeleteKey),DROPID('~FILE'),RESIZE
-      TOOLBAR                             ,AT(  0,  0,288, 41),USE(?TOOLBAR1)
-         BUTTON('&O')                     ,AT(  2,  2, 14, 14),USE(?AddFile)                             ,ICON(ICON:Open)     ,TIP('Open / Add File... (ALT+0)')             ,FLAT,LEFT
-         BUTTON('&S')                     ,AT( 19,  2, 14, 14),USE(?SaveAs)                      ,DISABLE,ICON(ICON:Save)     ,TIP('Save .LIB As... (ALT+S)')                ,FLAT,LEFT
-         BUTTON                           ,AT( 36,  2, 14, 14),USE(?Clear)                       ,DISABLE,ICON('clear.ico')   ,TIP('Empty the listbox')                      ,FLAT,LEFT
-         BUTTON                           ,AT( 53,  2, 14, 14),USE(?Exit)                                ,ICON('Exit.ico')    ,TIP('Exit the program')                       ,FLAT,LEFT              ,STD(STD:Close)
-         BUTTON('&F')                     ,AT( 70, 4,  14, 12),USE(?FindButton)                  ,DISABLE,ICON('Cs_srch.ico') ,TIP('Search for string (ALT+F)')              ,FLAT,LEFT
-         BUTTON                           ,AT( 87,  2, 14, 14),USE(?Info)                                ,ICON(ICON:Help)     ,TIP('Info')                                   ,FLAT,LEFT
-         BUTTON('Generate CW &Map')       ,AT(127,  4, 81, 10),USE(?MakeMap)                     ,DISABLE                     ,TIP('A head start on making a CW Map ...')    ,FLAT,LEFT
-         CHECK('Rons Format')             ,AT(222,  5        ),USE(glo.RonsFormat)                                            ,TIP('Machine readable format when generating a map')
-         BUTTON('Generate Classes')       ,AT(127, 16, 81, 10),USE(?GenerateClasses)             ,DISABLE                     ,TIP('A head start on making a CW Classes...') ,FLAT,LEFT
-         OPTION('Sort Order')             ,AT(  4, 16,123, 23),USE(glo.SortOrder)           ,BOXED
-            RADIO('Original')             ,AT(  8, 24, 37, 13),USE(?glo:SortOrder:Radio1)                ,ICON(ICON:None)
-            RADIO('Function')             ,AT( 47, 24, 37, 13),USE(?glo:SortOrder:Radio2)                ,ICON(ICON:None)
-            RADIO('Ordinal')              ,AT( 86, 24, 37, 13),USE(?glo:SortOrder:Radio3)                ,ICON(ICON:None)
-         END
+window WINDOW('MGLibMkr')                 ,AT(   ,   ,288,185),CENTER,GRAY,IMM,SYSTEM,ICON('LIBRARY.ICO'), FONT('Segoe UI'),ALRT(DeleteKey),DROPID('~FILE'),RESIZE
+      TOOLBAR                             ,AT(  0,  0,288, 22),USE(?TOOLBAR1),COLOR(COLOR:ACTIVECAPTION)
+         BUTTON('&O')                     ,AT(  2,  3, 18, 16),USE(?AddFile)                             ,ICON(ICON:Open)     ,TIP('Open / Add File... (ALT+0)')             ,FLAT,LEFT
+         BUTTON('&S')                     ,AT( 23,  3, 18, 16),USE(?SaveAs)                      ,DISABLE,ICON(ICON:Save)     ,TIP('Save .LIB As... (ALT+S)')                ,FLAT,LEFT
+         BUTTON                           ,AT( 44,  3, 18, 16),USE(?Clear)                       ,DISABLE,ICON('clear.ico')   ,TIP('Empty the listbox')                      ,FLAT,LEFT
+         BUTTON('&F')                     ,AT( 65,  3, 18, 16),USE(?FindButton)                  ,DISABLE,ICON('Cs_srch.ico') ,TIP('Search for string (ALT+F)')              ,FLAT,LEFT
+
+         PROMPT('Sort By')                ,AT( 94,  6, 25, 10)
+         LIST                             ,AT(121,  6, 52, 10),FROM('Original|#1|Procedure|#2|Ordinal|#3'),USE(glo.SortOrder),DROP(3),COLOR(0F0F0F0H) ! COLOR:Control
+
+         BUTTON('Generate Code')          ,AT(187,  3, 60, 16),USE(?GenerateCode)     
+         BUTTON                           ,AT(258,  3, 18, 16),USE(?Info)                                ,ICON(ICON:Help)     ,TIP('Info')                                   ,FLAT,LEFT
       END
-      SHEET                               ,AT(  4,  4,283,160),USE(?SHEET),SPREAD
+      SHEET                               ,AT(  4,  4,281,155),USE(?SHEET),SPREAD
          TAB('All')                                           ,USE(?Tab:All)
-            LIST                          ,AT(  8, 20,272,138),USE(?List1)                       ,DISABLE,COLUMN,VCR,VSCROLL,FROM(ExportQ)  ,FORMAT('143L(2)|MYT~Module and Procedures~30R(3)~Ordinal~@N_5B@')
+            LIST                          ,AT(  8, 22,272,135),USE(?List1)                       ,DISABLE,COLUMN,VCR,VSCROLL,FROM(ExportQ)  ,FORMAT('143L(2)|MYT~Module and Procedures~30R(3)~Ordinal~@N_5B@')
          END
          TAB('Matches to Search Only--- [0]')                 ,USE(?Tab:Filtered)                ,FONT(,,COLOR:Blue)
-            LIST                          ,AT(  8, 24,272,138),USE(?Filtered)                    ,DISABLE,COLUMN,VCR,VSCROLL,FROM(FilteredQ),FORMAT('143L(2)|MYT~Module and Procedures~30R(3)~Ordinal~@N_5B@')
+            LIST                          ,AT(  8, 22,272,135),USE(?Filtered)                    ,DISABLE,COLUMN,VCR,VSCROLL,FROM(FilteredQ),FORMAT('143L(2)|MYT~Module and Procedures~30R(3)~Ordinal~@N_5B@')
          END
       END
    END
@@ -283,8 +279,7 @@ AcceptLoop           ROUTINE
      CASE ACCEPTED()
        OF ?glo:SortOrder   ; DO Accepted:SortOrder
        OF ?FindButton      ; DO Accepted:FindButton
-       OF ?MakeMap         ; DO Accepted:MakeMap
-       OF ?GenerateClasses ; IF RECORDS(ExportQ)>0 THEN GenerateClasses() END                 
+       OF ?GenerateCode    ; GenerateCode()
        OF ?Info            ; InfoWindow()
        OF ?Clear           ; DO Accepted:Clear
        OF ?AddFile         ; DO Accepted:AddFile
@@ -326,8 +321,7 @@ EnableDisable       ROUTINE
   ?Filtered          {PROP:Disable} = ?List1{PROP:Disable}
   ?SaveAs            {PROP:Disable} = ?List1{PROP:Disable}
   ?Clear             {PROP:Disable} = ?List1{PROP:Disable}
-  ?MakeMap           {PROP:Disable} = ?List1{PROP:Disable}
-  ?GenerateClasses   {PROP:Disable} = ?List1{PROP:Disable}
+  ?GenerateCode      {PROP:Disable} = ?List1{PROP:Disable}
   ?glo:SortOrder     {PROP:Disable} = ?List1{PROP:Disable}
   ?FindButton        {PROP:Disable} = ?List1{PROP:Disable}
   
@@ -336,9 +330,9 @@ EnableDisable       ROUTINE
 !Region Accepted ROUTINEs
 Accepted:SortOrder ROUTINE       
    SETCURSOR(CURSOR:Wait)
-   EXECUTE CHOICE(?glo:SortOrder)
+   EXECUTE glo.SortOrder ! CHOICE(?glo:SortOrder)
       BEGIN; SORT(ExportQ,ExportQ.orgorder)                                 ; SORT(FilteredQ,FLTQ:orgorder)                           ; END
-      BEGIN; SORT(ExportQ,ExportQ.Module,ExportQ.TreeLevel,ExportQ.symbol)  ; SORT(FilteredQ,FLTQ:Module,FLTQ:TreeLevel,FLTQ:symbol)  ; END
+      BEGIN; SORT(ExportQ,ExportQ.Module,ExportQ.TreeLevel,ExportQ.symbol)  ; SORT(FilteredQ,FLTQ:Module,FLTQ:TreeLevel,FLTQ:symbol)  ; END ! Consider a case insensitive Sort order..
       BEGIN; SORT(ExportQ,ExportQ.Module,ExportQ.TreeLevel,ExportQ.Ordinal) ; SORT(FilteredQ,FLTQ:Module,FLTQ:TreeLevel,FLTQ:Ordinal) ; END
    END
    ?List1   {PROP:Format} = ?List1   {PROP:Format} !<-- Added to force re-draw of Q (needed in C5EEB4 and likely elsewhere)
@@ -350,19 +344,6 @@ Accepted:FindButton ROUTINE
    ?List1   {PROP:Format} = ?List1   {PROP:Format} !<-- Added to force re-draw of Q (needed in C5EEB4 and likely elsewhere)
    ?Filtered{PROP:Format} = ?Filtered{PROP:Format} !<-- Added to force re-draw of Q (needed in C5EEB4 and likely elsewhere)
    DO Set_FoundCount
-
-Accepted:MakeMap  ROUTINE
-    IF RECORDS(ExportQ)>0
-     CLEAR(FileName) !FileName = AsciiFileName
-     IF FILEDIALOG('Save Clarion Map definition as ...', FileName, |
-        'CW Source and Includes (*.clw,*.inc)|*.clw;*.inc|Source Only|*.clw|Includes Only|*.inc|All|*.*',FILE:Save+FILE:LongName)
-        GenerateMap(glo.RonsFormat)
-        !AsciiFileName = FileName
-        if MESSAGE('Would you like to view the map with Notepad?','Note',ICON:Question,Button:Yes+Button:No,Button:Yes)=Button:Yes
-           RUN('notepad ' & FileName)
-        END
-     END
-   END
 
 Accepted:Clear ROUTINE       
    FREE(ExportQ); FREE(FilteredQ)   
@@ -795,15 +776,15 @@ SearchFlag      LIKE(ExportQ.SearchFlag)
 UnknownFlagCnt  ULONG
               END
 
-Swindow WINDOW('Define search'),AT(,,229,38),FONT('MS Sans Serif',8,,FONT:regular),SYSTEM,GRAY
-       STRING('Search for'),AT(9,3),USE(?String1)
-       ENTRY(@s20),AT(45,3,180,10),USE(lcl.SearchString)
-       OPTION('Search Method'),AT(3,14,121,21),USE(lcl.SearchOption),BOXED
-         RADIO('Contains'),AT(15,22),USE(?Option1:Radio1),TIP('Will find symbols that have the search string in them ANYWHERE')
-         RADIO('Starts with'),AT(71,22),USE(?Option1:Radio2),TIP('Will only find symbols that start with the search string')
+Swindow WINDOW('Search'),AT(,,229,65),GRAY,SYSTEM,FONT('Segoe UI',8,,FONT:regular)
+		OPTION,AT(17,26,11,10),USE(lcl.SearchOption)
+			RADIO('Contains'),AT(18,28),USE(?Option1:Radio1),TIP('Will find symbols that have the search string in them ANYWHERE')
+			RADIO('Starts with'),AT(18,41),USE(?Option1:Radio2),TIP('Will only find symbols that start with the search string')
        END
-       BUTTON('&Search Now'),AT(128,21,48,14),USE(?SearchButton),DEFAULT
-       BUTTON('&Cancel'),AT(180,21,45,14),USE(?CloseButton),LEFT,ICON('Exit.ico'),STD(STD:Close)
+		STRING('Search for'),AT(7,3),USE(?String1),FONT(,,COLOR:BTNSHADOW)
+		ENTRY(@s20),AT(7,12,215,10),USE(lcl.SearchString)
+		BUTTON('&Search Now'),AT(100,39,57,18),USE(?SearchButton),DEFAULT
+		BUTTON('&Cancel'),AT(165,39,57,18),USE(?CloseButton),STD(STD:Close),ICON('Exit.ico'),LEFT
      END
   !Todo: Consider changing "symbol" to "Function/Module"
   CODE
@@ -940,6 +921,14 @@ MaxSymLen          LONG
                 end
 
    CODE
+   CLEAR(FileName) !FileName = AsciiFileName
+   IF NOT FILEDIALOG('Save Clarion Map definition as ...', FileName, |
+                     'CW Source and Includes (*.clw,*.inc)|*.clw;*.inc|Source Only|*.clw|Includes Only|*.inc|All|*.*',FILE:Save+FILE:LongName)  | 
+   THEN
+      RETURN 
+   END 
+
+
    lcl.MaxSymLen = LongestSymbol() !in ExportQ Level 2   
 
    CREATE(Asciifile)
@@ -960,6 +949,10 @@ MaxSymLen          LONG
    
    ADD  (ASCIIFile)
    CLOSE(Asciifile)
+
+   IF MESSAGE('Would you like to view the map with Notepad?','Note',ICON:Question,Button:Yes+Button:No,Button:Yes)=Button:Yes
+      RUN('notepad ' & FileName)
+   END
 
 TreeLevel1 ROUTINE        
     IF lcl.exq_rec >1
@@ -1042,8 +1035,14 @@ instringLoc   LONG,AUTO
 
 
 
-
-
+!========================================================================================
+GenerateCode  PROCEDURE()
+   CODE 
+   EXECUTE MESSAGE('What would you like to generate?','Generate Code', SYSTEM{PROP:Icon},'&Map|Map (&Rons Format)|&Classes')
+      GenerateMap( FALSE )
+      GenerateMap( TRUE  )
+      GenerateClasses()
+   END 
 
 
 !========================================================================================
@@ -1073,6 +1072,10 @@ MaxSymLen      LONG,AUTO !Used For Alignment
    DO Generate:AllCLW
    
    SETCURSOR()
+
+   IF MESSAGE('Would you like to open Explorer?','Classes Generated',ICON:Question,Button:Yes+Button:No,Button:Yes)=Button:Yes
+      RUN('Explorer ' & GenDir)
+   END 
 
 PromptForFolder ROUTINE !may return
    GenDir = 'C:\Tmp\GenDir' !<-- TODO Fix
