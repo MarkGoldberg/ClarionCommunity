@@ -124,7 +124,6 @@ Glo             GROUP
 SortOrder          LONG(1)
 DisplayCount       ULONG
 FoundCount         ULONG 
-RonsFormat         BYTE
 LevelOneCount      LONG
                 END 
 
@@ -200,7 +199,6 @@ PostAccept           ROUTINE
       PUTINI('Position','H',0{prop:Height},qINI_FILE)
    !  PUTINI('Position','Col1W',?List1{proplist:Width,1},qINI_FILE)
    END
-   PUTINI('Settings','RonsFormat',glo.RonsFormat,qINI_FILE)
 !-----------------------------------------------------
 PreAccept            ROUTINE
    OPEN(window)
@@ -232,7 +230,6 @@ PreAccept            ROUTINE
    0{prop:YPOS}   = GETINI('Position','Y',0{prop:YPOS } ,qINI_FILE)
    0{prop:Width}  = GETINI('Position','W',0{prop:Width} ,qINI_FILE)
    0{prop:Height} = GETINI('Position','H',0{prop:Height},qINI_FILE)
-   glo.RonsFormat = GETINI('Settings','RonsFormat',FALSE,qINI_FILE)
 
    ?List1{PROP:LineHeight}  = 8               !AB
 
