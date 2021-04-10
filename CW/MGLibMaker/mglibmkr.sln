@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 # Clarion 2.1.0.2447
 Project("{12B76EC0-1D7B-4FA7-A7D0-C524288B48A1}") = "mglibmkr", "mglibmkr.cwproj", "{7C245C26-1F38-4421-94E4-DEAE04663C37}"
 EndProject

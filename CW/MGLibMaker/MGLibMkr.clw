@@ -239,6 +239,8 @@ PreAccept            ROUTINE
    InitList(?List1)
    InitList(?Filtered)
 
+   ?Sheet{PROP:TabSheetStyle} = TabStyle:BlackAndWhite
+
    DO PreAccept:CommandLine
 
 
@@ -267,11 +269,30 @@ PreAccept:CommandLine ROUTINE
    END 
 
                                           ! DBG.Debugout('COMMAND(''/CLOSE'')['& COMMAND('/CLOSE') &']')
+   DO PreAccept:CommandLine:ExpectedProcs
+
    IF COMMAND('/CLOSE')
       POST(EVENT:CloseWindow)
    END
  
    DISPLAY()
+
+PreAccept:CommandLine:ExpectedProcs ROUTINE 
+   DATA 
+ExpectedExp   LONG,AUTO
+FoundExp      LONG,AUTO 
+   CODE 
+   ExpectedExp   = COMMAND('ExpectedExp')
+   FoundExp      = RECORDS(ExportQ) - 1   ! - 1 For the FileName Row
+
+   IF ExpectedExp AND ExpectedExp <> FoundExp
+
+      MESSAGE(  'Expected ['& ExpectedExp &'] exports'                                              |
+              &'|Found ['& FoundExp &'] exports instead<160>{5}'                                    | ! add no-break spaces so title doesn't get clipped when writing 'many'
+              ,'Warning too ' & CHOOSE( ExpectedExp < FoundExp, 'few','many') & ' procedures found' |
+              , ICON:Hand |
+             )  
+   END 
 !------------------------------------------------------
 !Region Accept Loop
 AcceptLoop           ROUTINE   
@@ -763,7 +784,7 @@ infowin WINDOW('About LibMaker'),AT(,,229,185),GRAY,SYSTEM,FONT('Segoe UI',8,,FO
 		STRING('TIP:'),AT(12,123),USE(?STRING2),FONT(,,,FONT:bold)
 		PROMPT('You can drag a DLL from explorer to  LibMaker'),AT(40,123),USE(?PROMPT1)
 		STRING('TIP:'),AT(12,137,13,10),USE(?STRING2:2),FONT(,,,FONT:bold)
-		PROMPT('Command line arguments<13,10>READ="FileName"<13,10>WRITE="FileName"<13,10>/CLOSE'),AT(40,137,130,44),USE(?PROMPT2)
+		PROMPT('Command line arguments<13,10>READ="FileName"<13,10>WRITE="FileName"<13,10>ExpectedExp=N<13,10>/CLOSE'),AT(40,137,130,44),USE(?PROMPT2)
 	END
 
    CODE
