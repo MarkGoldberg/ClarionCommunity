@@ -1,25 +1,109 @@
-# Set the default behavior, in case people don't have core.autocrlf set.
-* text eol=crlf
+# .gitattributes for Clarion repositories - place at the repo root and commit it.
+#
+# WHY eol=crlf AND NOT `-text`:
+#   The Clarion compiler rejects LF-only source (.clw/.inc/.int/.equ/...).
+#   `eol=crlf` forces CRLF into the working tree on every machine, whatever
+#   that machine's core.autocrlf setting is. A bare `-text` only means "do not
+#   convert", so a file stored with LF endings would check out LF-only and fail
+#   to compile.
+#
+# DO NOT WRITE `* text=false`:
+#   `false` is not a recognised value of the text attribute. The rule is
+#   silently ignored and behaviour falls back to core.autocrlf. Use `-text` to
+#   mean "never convert".
+#
+# WHY SOURCE EXTENSIONS ARE LISTED EXPLICITLY:
+#   `text=auto` leaves the text/binary decision to git's detector, which can
+#   misjudge real Clarion source: a file ending in a lone CR, or a small file
+#   containing a DOS Ctrl-Z (0x1A), can be graded binary. A binary verdict means
+#   no conversion, which re-opens the LF-only problem above.
+#
+# Bracket globs such as *.[Cc][Ll][Ww] are case-insensitive without depending
+# on core.ignorecase, so the rules behave the same on Linux or CI as on Windows.
 
-# Explicitly declare text files you want to always be normalized and converted
-# to native line endings on checkout.
-*.clw text
-*.inc text
-*.int text
-*.cwproj text
-*.sln text
+# --- baseline: detect text, and force CRLF on whatever is text ---------------
+* text=auto eol=crlf
 
-# Declare files that will always have CRLF line endings on checkout.
-*.sln text eol=crlf
+# --- Clarion source: never left to the detector ------------------------------
+*.[Cc][Ll][Ww]  text eol=crlf
+*.[Ii][Nn][Cc]  text eol=crlf
+*.[Ii][Nn][Tt]  text eol=crlf
+*.[Ee][Qq][Uu]  text eol=crlf
+*.[Tt][Rr][Nn]  text eol=crlf
+*.[Tt][Pp][Ll]  text eol=crlf
+*.[Tt][Pp][Ww]  text eol=crlf
+*.[Tt][Xx][Aa]  text eol=crlf
+*.[Tt][Xx][Dd]  text eol=crlf
+*.[Rr][Ee][Dd]  text eol=crlf
+*.[Pp][Rr]      text eol=crlf
+*.[Pp][Rr][Jj]  text eol=crlf
 
-# Denote all files that are truly binary and should not be modified.
-*.png binary
-*.jpg binary
-*.gif binary
-*.bmp binary
-*.ico binary
-*.dct binary
-*.app binary
+# --- binary: never converted, diffed or merged ------------------------------
+*.[Dd][Cc][Tt]      binary
+*.[Aa][Pp][Pp]      binary
+*.[Tt][Pp][Ss]      binary
+*.[Rr][Ee][Ss]      binary
+*.[Ii][Cc][Oo]      binary
+*.[Cc][Uu][Rr]      binary
+*.[Bb][Mm][Pp]      binary
+*.[Gg][Ii][Ff]      binary
+*.[Jj][Pp][Gg]      binary
+*.[Jj][Pp][Ee][Gg]  binary
+*.[Pp][Nn][Gg]      binary
+*.[Ww][Mm][Ff]      binary
+*.[Ee][Mm][Ff]      binary
+*.[Ll][Ii][Bb]      binary
+*.[Dd][Ll][Ll]      binary
+*.[Ee][Xx][Ee]      binary
+*.[Oo][Bb][Jj]      binary
+*.[Pp][Dd][Bb]      binary
+*.[Cc][Hh][Mm]      binary
+*.[Hh][Ll][Pp]      binary
+*.[Pp][Dd][Ff]      binary
+*.[Zz][Ii][Pp]      binary
+*.7[Zz]             binary
+*.[Cc][Aa][Bb]      binary
+*.[Mm][Ss][Ii]      binary
+*.[Ll][Nn][Kk]      binary
+*.[Ss][Xx][Dd]      binary
+*.[Ss][Uu][Oo]      binary
+*.[Bb][Ii][Nn]      binary
+*.[Ww][Aa][Vv]      binary
+*.[Mm][Pp]3         binary
+*.[Xx][Ll][Ss]      binary
+*.[Xx][Ll][Ss][Xx]  binary
+*.[Dd][Oo][Cc]      binary
+*.[Dd][Oo][Cc][Xx]  binary
 
-# identify *.inc files as being Clarion
-*.inc linguist-language=Clarion
+# --- renamed copies of binaries (foo.exe.old, foo.dll.bak, foo.lib.v2) ------
+# The real extension sits in the middle of the name, where the rules above
+# cannot see it. The trailing ".*" requires a dot after the extension, so these
+# do not replace the plain rules above -- both are needed.
+*.[Ee][Xx][Ee].*    binary
+*.[Dd][Ll][Ll].*    binary
+*.[Ll][Ii][Bb].*    binary
+*.[Oo][Bb][Jj].*    binary
+
+# ...except build-generated TEXT that also has .exe/.dll mid-name
+# (foo.exe.manifest, foo.exe.config, foo.dll.metagen). These lines must stay
+# BELOW the ".*" rules, because the later line wins. "diff merge" undoes the
+# -diff -merge that the binary rules above applied.
+*.[Mm][Aa][Nn][Ii][Ff][Ee][Ss][Tt]  text eol=crlf diff merge
+*.[Cc][Oo][Nn][Ff][Ii][Gg]          text eol=crlf diff merge
+*.[Mm][Ee][Tt][Aa][Gg][Ee][Nn]      text eol=crlf diff merge
+
+# Shell scripts must keep LF even on Windows, or bash will not run them.
+*.[Ss][Hh]  text eol=lf
+
+# The binary list cannot cover every extension. Anything unlisted is still
+# protected by "* text=auto" at the top, which treats files containing NUL
+# bytes as binary. The explicit lists are a backstop for where that guess is
+# wrong -- keep both.
+
+# --- Linguist: GitHub language stats and syntax highlighting ----------------
+# Bracketed because Clarion sources are often UPPERCASE on disk and GitHub's
+# matching is case-sensitive.
+*.[Cc][Ll][Ww]  linguist-language=Clarion
+*.[Ii][Nn][Cc]  linguist-language=Clarion
+*.[Ii][Nn][Tt]  linguist-language=Clarion
+*.[Ee][Qq][Uu]  linguist-language=Clarion
